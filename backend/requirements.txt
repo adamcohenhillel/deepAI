@@ -1,2 +1,10 @@
+#API:
 Flask==2.0.3
-celer==5.2.3
+
+# Workers
+celery==5.2.3
+
+# DBs:
+Flask-SQLAlchemy==s2.5.1
+SQLAlchemy==1.4.32
+redis==4.1.4
