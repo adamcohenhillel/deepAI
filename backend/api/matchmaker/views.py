@@ -5,7 +5,7 @@ from flask import Blueprint, request
 from flask.views import MethodView
 
 
-matchmaker_bp = Blueprint('matchmaker_bp')
+matchmaker_bp = Blueprint('matchmaker_bp', __name__)
 
 
 class MatchmakerResource(MethodView):
