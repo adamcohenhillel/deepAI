@@ -1,14 +1,18 @@
-from distutils.debug import DEBUG
-
 """
 """
 
 
 class APIProdConfig:
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
+    
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////Users/adamcohenhillel/Desktop/projects/unspoken/test.db'
+    
+    JWT_SECRET_KEY = 'super-secret-change-me'  # TODO: Change this!
 
 
 class APITestConfig:
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
+    
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////Users/adamcohenhillel/Desktop/projects/unspoken/test.db'
+    
+    JWT_SECRET_KEY = 'super-secret-change-me'  # TODO: Change this!
