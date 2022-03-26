@@ -3,6 +3,7 @@
 """
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
+from flask_jwt_extended import create_access_token
 
 from api.users.models import User
 from api.users.schemas import UserSchema
@@ -40,4 +41,19 @@ class UsersListResource(MethodView):
         pass
 
 
+class AccessTokensResource(MethodView):
+    """Generate access tokens for users
+    """
+
+    def post(self):
+        post_data = request.get_json() or {}
+        validated_data = UserSchema().load(post_data)
+
+        user = User.query.filter(User.username == validated_data['username']).first()
+
+        access_token = create_access_token(identity=user.id)
+        return jsonify(access_token=access_token)
+
+
 users_bp.add_url_rule('/', view_func=UsersListResource.as_view('users_list_resource'))
+users_bp.add_url_rule('/auth', view_func=AccessTokensResource.as_view('users_auth_resource'))

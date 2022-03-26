@@ -4,7 +4,7 @@ import os
 
 from flask import Flask
 
-from core.ext import db
+from core.ext import db, jwt
 from api.matchmaker.views import matchmaker_bp
 from api.users.views import users_bp
 from api.errors.handlers import errors_handlers_bp
@@ -22,14 +22,18 @@ def create_app():
         app.config.from_object('config.APIProdConfig')
 
 
+    jwt.init_app(app)
     db.init_app(app)
     with app.app_context():
         db.drop_all()
         db.create_all()
+    
 
+    ########################
+    ##     BLUEPRINTS     ##
+    app.register_blueprint(errors_handlers_bp)
     app.register_blueprint(matchmaker_bp, url_prefix='/api/v1/matchmacker')
     app.register_blueprint(users_bp, url_prefix='/api/v1/users')
-    app.register_blueprint(errors_handlers_bp)
 
     return app
 
