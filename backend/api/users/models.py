@@ -10,4 +10,5 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
-    username = Column(Integer, ForeignKey('users.id'), nullable=False)
+
+    # TODO: Add back relationship to matches

@@ -6,6 +6,7 @@ from flask import Flask
 
 from core.ext import db
 from api.matchmaker.views import matchmaker_bp
+from api.users.views import users_bp
 
 
 def create_app():
@@ -14,8 +15,8 @@ def create_app():
     app = Flask(__name__)
     app.url_map.strict_slashes = False
 
-    backend_test_mode = os.getenv('BACKEND_TEST_MODE') or False
-    if backend_test_mode:
+    test_mode = os.getenv('TEST_MODE') or False
+    if test_mode:
         app.config.from_object('config.APITestConfig')
     else:
         app.config.from_object('config.APIProdConfig')
@@ -26,6 +27,7 @@ def create_app():
         db.create_all()
 
     app.register_blueprint(matchmaker_bp, url_prefix='/api/v1/matchmacker')
+    app.register_blueprint(users_bp, url_prefix='/api/v1/users')
 
     return app
 

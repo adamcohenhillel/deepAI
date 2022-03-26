@@ -1,16 +1,16 @@
-"""Adam Cohen Hillel 2022, All Rights Reserved
-"""
-import logging
 
-from flask import Blueprint, request
+"""
+"""
+from flask import Blueprint
 from flask.views import MethodView
 
-from api.matchmaker.models import MatchRequest
-
-matchmaker_bp = Blueprint('matchmaker_bp', __name__)
+from api.users.models import User
 
 
-class MatchmakerResource(MethodView):
+users_bp = Blueprint('users_bp', __name__)
+
+
+class UsersListResource(MethodView):
     """
     """
 
