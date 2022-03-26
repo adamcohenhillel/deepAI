@@ -1,5 +1,6 @@
 #API:
 Flask==2.0.3
+marshmallow==3.15.0
 
 # Workers
 celery==5.2.3
