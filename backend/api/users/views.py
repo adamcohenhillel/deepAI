@@ -4,6 +4,7 @@
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 from flask_jwt_extended import create_access_token
+from werkzeug.exceptions import BadRequest
 
 from api.users.models import User
 from api.users.schemas import UserSchema
@@ -46,7 +47,9 @@ class AccessTokensResource(MethodView):
         post_data = request.get_json() or {}
         validated_data = UserSchema().load(post_data)
 
-        user = User.query.filter(User.username == validated_data['username']).first()
+        user = User.query.filter_by(username=validated_data['username']).first()
+        if not user:
+            raise BadRequest('Username or password are incorrect')
 
         access_token = create_access_token(identity=user.id)
         return jsonify(access_token=access_token)

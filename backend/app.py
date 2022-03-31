@@ -8,6 +8,7 @@ from core.ext import db, jwt
 from api.matchmaker.views import matchmaker_bp
 from api.users.views import users_bp
 from api.errors.handlers import errors_handlers_bp
+from api.users.models import User
 
 def create_app():
     """
@@ -27,6 +28,10 @@ def create_app():
     with app.app_context():
         db.drop_all()
         db.create_all()
+
+        # Create a test user for now TODO: Delete ME!
+        db.session.add(User(username='admin', password='12345678'))
+        db.session.commit()
     
 
     ########################
