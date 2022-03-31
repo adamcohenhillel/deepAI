@@ -8,8 +8,6 @@ from flask_jwt_extended import create_access_token
 from api.users.models import User
 from api.users.schemas import UserSchema
 from core.ext import db
-from api.utils import api_response
-
 
 users_bp = Blueprint('users_bp', __name__)
 
@@ -24,15 +22,14 @@ class UsersListResource(MethodView):
     
     # TODO: Add some kind of authentication
     def post(self):
-        """
+        """Create a new user
         """
         post_data = request.get_json() or {}
         validated_data = UserSchema().load(post_data)
         new_user = User(**validated_data)
         db.session.add(new_user)
         db.session.commit()
-
-        return api_response('New user was created', 201)
+        return jsonify(msg='New user was created'), 201
     
     def put(self):
         pass
