@@ -1,6 +1,6 @@
 """
 """
-from sqlalchemy import Column, Integer, ForeignKey, String
+from sqlalchemy import Column, Integer, String
 
 from core.ext import Base
 

@@ -6,6 +6,9 @@ flask-jwt-extended==4.3.1
 # Workers
 celery==5.2.3
 
+# 
+nltk==3.7
+
 # DBs:
 Flask-SQLAlchemy==s2.5.1
 SQLAlchemy==1.4.32
