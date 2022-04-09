@@ -1,3 +1,5 @@
+"""Adam Cohen Hillel 2022, All Rights Reserved
+"""
 from nltk import tokenize
 from operator import itemgetter
 import math

@@ -1,5 +1,4 @@
-
-"""
+"""Adam Cohen Hillel 2022, All Rights Reserved
 """
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
@@ -9,6 +8,7 @@ from werkzeug.exceptions import BadRequest
 from api.users.models import User
 from api.users.schemas import UserSchema
 from core.ext import db
+
 
 users_bp = Blueprint('users_bp', __name__)
 
