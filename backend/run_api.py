@@ -1,14 +1,7 @@
 """Adam Cohen Hillel 2022, All Rights Reserved
 """
-from celery import Celery
-
-
-def create_app():
-    """
-    """
-    celery_app = Celery()
-
+from api import create_app
 
 if __name__ == '__main__':
     app = create_app()
-    
+    app.run(host='0.0.0.0', port=5001)

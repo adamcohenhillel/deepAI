@@ -18,4 +18,4 @@ You've seen some apps out there that trying to do somewhat similar thing, so you
 Socializing without 
 
 Danger with this platform:
-Groups and individuals that find eachother and  
+Groups and individuals that find eachother and

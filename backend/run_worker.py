@@ -1,14 +1,7 @@
 """Adam Cohen Hillel 2022, All Rights Reserved
 """
-from celery import Celery
-
-
-def create_app():
-    """
-    """
-    celery_app = Celery()
+from worker import create_app
 
 
 if __name__ == '__main__':
     app = create_app()
-    

@@ -3,7 +3,7 @@
 import json
 import logging
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 
