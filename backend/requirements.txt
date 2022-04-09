@@ -13,3 +13,10 @@ nltk==3.7
 Flask-SQLAlchemy==s2.5.1
 SQLAlchemy==1.4.32
 redis==4.1.4
+
+#CI:
+isort==5.9.3
+flake8==3.4.8
+flake8-bandit==2.1.2
+mypy==0.812
+flake8-import-order==0.18.1

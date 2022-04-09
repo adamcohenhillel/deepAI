@@ -37,6 +37,7 @@ class MatchmakerResource(MethodView):
         new_request = MatchRequest(user_id=user_id, **validated_data)
         db.session.add(new_request)
         db.session.commit()
+        current_app.worker.send_task('analayzer')
         return jsonify(msg='Created'), 201
     
     # def put(self):

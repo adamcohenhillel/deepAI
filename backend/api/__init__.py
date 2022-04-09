@@ -9,6 +9,8 @@ from api.matchmaker.views import matchmaker_bp
 from api.users.views import users_bp
 from api.errors.handlers import errors_handlers_bp
 from api.users.models import User
+from worker import create_celery_instance
+
 
 def create_app():
     """
@@ -33,11 +35,10 @@ def create_app():
         db.session.add(User(username='admin', password='12345678'))
         db.session.commit()
     
-
+    app.worker = create_celery_instance()
     ########################
     ##     BLUEPRINTS     ##
     app.register_blueprint(errors_handlers_bp)
     app.register_blueprint(matchmaker_bp, url_prefix='/api/v1/matchmacker')
     app.register_blueprint(users_bp, url_prefix='/api/v1/users')
-
     return app
