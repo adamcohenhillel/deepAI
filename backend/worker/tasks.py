@@ -2,9 +2,11 @@
 """
 from celery import shared_task
 
+from backend.api.matchmaker.models import MatchRequest
 
-@shared_task(bind=True, name='analayzer')
-def analayzer(self):
+
+@shared_task(bind=True, name='analayze.keyword_extract')
+def analayzer(self, match_request_id: MatchRequest) -> None:
     """
     """
     print("Heyoooo")
