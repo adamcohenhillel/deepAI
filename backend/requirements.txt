@@ -6,8 +6,9 @@ flask-jwt-extended==4.3.1
 # Workers
 celery==5.2.3
 
-# 
+# Text Analyzer
 nltk==3.7
+openai==0.18.0
 
 # DBs:
 Flask-SQLAlchemy==s2.5.1
