@@ -6,13 +6,15 @@ flask-jwt-extended==4.3.1
 # Workers
 celery==5.2.3
 
-# 
+# Text Analyzer
 nltk==3.7
+openai==0.18.0
 
 # DBs:
 Flask-SQLAlchemy==s2.5.1
 SQLAlchemy==1.4.32
 redis==4.1.4
+neo4j==4.4.3
 
 #CI:
 isort==5.9.3

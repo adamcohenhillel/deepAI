@@ -1,6 +1,7 @@
 """Adam Cohen Hillel 2022, All Rights Reserved
 """
 import logging
+from typing import Any
 
 from celery.contrib.abortable import AbortableTask
 from sqlalchemy import create_engine
@@ -14,7 +15,7 @@ class TaskBase(AbortableTask):
     """
     _session = None
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__()
 
     @property
