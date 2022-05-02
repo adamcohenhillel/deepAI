@@ -33,6 +33,7 @@ MANIFEST
 *.manifest
 *.spec
 
+.vscode/
 *.db
 
 # Installer logs
