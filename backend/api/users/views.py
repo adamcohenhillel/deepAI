@@ -1,12 +1,13 @@
 """Adam Cohen Hillel 2022, All Rights Reserved
 """
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask.views import MethodView
 from flask_jwt_extended import create_access_token
 from werkzeug.exceptions import BadRequest
 
 from api.users.models import User
 from api.users.schemas import UserSchema
+from core.neo4j.entities import DeepRequestNode
 from core.ext import db
 
 
@@ -18,8 +19,8 @@ class UsersListResource(MethodView):
     """
 
     def get(self):
-        pass
         # user_data = MatchRequest.query.filter_by().all()
+        pass
     
     # TODO: Add some kind of authentication
     def post(self):

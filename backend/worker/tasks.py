@@ -5,7 +5,6 @@ from typing import Dict
 import openai
 from celery import shared_task
 
-from api.matchmaker.models import MatchRequest
 from worker.task_base import TaskBase
 
 
@@ -18,7 +17,7 @@ _OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\n
 def text_analyzer(self: TaskBase, match_request_id: int) -> Dict:
     """TODO: Optimize this method
     """
-    match_request = self.session.query(MatchRequest).get(match_request_id)
+    match_request = '' # self.session.query(MatchRequest).get(match_request_id)
     prompt = f"{_OPENAI_PROMPT}\"{match_request.raw_request}\""
     logging.info(f'About to query OpenAI with the folloiwng prompt: "{prompt}"')
     response = openai.Completion.create(

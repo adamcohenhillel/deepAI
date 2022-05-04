@@ -4,8 +4,9 @@ import os
 
 from flask import Flask
 
+from core.neo4j.connector import Neo4jDBConnector
 from core.ext import db, jwt
-from api.matchmaker.views import matchmaker_bp
+from api.deeprequest.views import deeprequest_bp
 from api.users.views import users_bp
 from api.errors.handlers import errors_handlers_bp
 from api.users.models import User
@@ -36,9 +37,12 @@ def create_app():
         db.session.commit()
     
     app.worker = create_celery_instance()
+    app.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
+
+    app.neo4j.testme()
     ########################
     ##     BLUEPRINTS     ##
     app.register_blueprint(errors_handlers_bp)
-    app.register_blueprint(matchmaker_bp, url_prefix='/api/v1/matchmacker')
+    app.register_blueprint(deeprequest_bp, url_prefix='/api/v1/deeprequest')
     app.register_blueprint(users_bp, url_prefix='/api/v1/users')
     return app
