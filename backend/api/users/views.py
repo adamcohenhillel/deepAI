@@ -1,4 +1,4 @@
-"""Adam Cohen Hillel 2022, All Rights Reserved
+"""Deeper 2022, All Rights Reserved
 """
 from flask import Blueprint, jsonify, request, current_app
 from flask.views import MethodView

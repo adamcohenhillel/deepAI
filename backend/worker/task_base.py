@@ -1,4 +1,4 @@
-"""Adam Cohen Hillel 2022, All Rights Reserved
+"""Deeper 2022, All Rights Reserved
 """
 import logging
 from typing import Any
