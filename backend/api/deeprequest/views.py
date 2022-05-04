@@ -14,7 +14,7 @@ from core.ext import db
 
 deeprequest_bp = Blueprint('deeprequest_bp', __name__)
 
-    
+
 class DeepRequestResource(MethodView):
     """
     """
@@ -23,7 +23,7 @@ class DeepRequestResource(MethodView):
         verify_jwt_in_request()
         user_id = get_jwt_identity()
         pass
-    
+
     # @jwt_required
     def post(self):
         """
@@ -36,16 +36,19 @@ class DeepRequestResource(MethodView):
             raise BadRequest('deep_request must be provided')
 
         with current_app.neo4j.use_session() as session:
-            new_node_id = session.write_transaction(DeepRequestNode.create, post_data['deep_request'])
+            new_node_id = session.write_transaction(
+                DeepRequestNode.create, post_data['deep_request'])
 
-        current_app.worker.send_task('text_analyzer', args=(post_data['deep_request'], new_node_id,))
+        current_app.worker.send_task('text_analyzer', args=(
+            post_data['deep_request'], new_node_id,))
         return jsonify(msg='Created'), 201
-    
+
     # def put(self):
     #     pass
-    
+
     # def delete(self):
     #     pass
 
-        
-deeprequest_bp.add_url_rule('/', view_func=DeepRequestResource.as_view('deeprequest_resource'))
+
+deeprequest_bp.add_url_rule(
+    '/', view_func=DeepRequestResource.as_view('deeprequest_resource'))

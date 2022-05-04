@@ -21,7 +21,7 @@ class UsersListResource(MethodView):
     def get(self):
         # user_data = MatchRequest.query.filter_by().all()
         pass
-    
+
     # TODO: Add some kind of authentication
     def post(self):
         """Create a new user
@@ -32,10 +32,10 @@ class UsersListResource(MethodView):
         db.session.add(new_user)
         db.session.commit()
         return jsonify(msg='New user was created'), 201
-    
+
     def put(self):
         pass
-    
+
     def delete(self):
         pass
 
@@ -48,7 +48,8 @@ class AccessTokensResource(MethodView):
         post_data = request.get_json() or {}
         validated_data = UserSchema().load(post_data)
 
-        user = User.query.filter_by(username=validated_data['username']).first()
+        user = User.query.filter_by(
+            username=validated_data['username']).first()
         if not user:
             raise BadRequest('Username or password are incorrect')
 
@@ -56,5 +57,7 @@ class AccessTokensResource(MethodView):
         return jsonify(access_token=access_token)
 
 
-users_bp.add_url_rule('/', view_func=UsersListResource.as_view('users_list_resource'))
-users_bp.add_url_rule('/auth', view_func=AccessTokensResource.as_view('users_auth_resource'))
+users_bp.add_url_rule(
+    '/', view_func=UsersListResource.as_view('users_list_resource'))
+users_bp.add_url_rule(
+    '/auth', view_func=AccessTokensResource.as_view('users_auth_resource'))
