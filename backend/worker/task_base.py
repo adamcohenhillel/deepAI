@@ -6,7 +6,7 @@ from typing import Any
 from celery.contrib.abortable import AbortableTask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
-from config import APIProdConfig
+from config import ProdConfig
 
 
 class TaskBase(AbortableTask):
@@ -23,7 +23,7 @@ class TaskBase(AbortableTask):
         """
         """
         if not self._session:
-            engine = create_engine(APIProdConfig.SQLALCHEMY_DATABASE_URI)  #TODO: Have different way for config
+            engine = create_engine(ProdConfig.SQLALCHEMY_DATABASE_URI)  #TODO: Have different way for config
             session = scoped_session(sessionmaker(bind=engine))()
             self._session = session
         return self._session

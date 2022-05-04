@@ -18,12 +18,7 @@ def create_app():
     """
     app = Flask(__name__)
     app.url_map.strict_slashes = False
-
-    test_mode = os.getenv('TEST_MODE') or False
-    if test_mode:
-        app.config.from_object('config.APITestConfig')
-    else:
-        app.config.from_object('config.APIProdConfig')
+    app.config.from_object('config.TestConfig' if os.getenv('TEST_MODE') else 'config.ProdConfig')
 
 
     jwt.init_app(app)
@@ -39,7 +34,6 @@ def create_app():
     app.worker = create_celery_instance()
     app.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
 
-    app.neo4j.testme()
     ########################
     ##     BLUEPRINTS     ##
     app.register_blueprint(errors_handlers_bp)
