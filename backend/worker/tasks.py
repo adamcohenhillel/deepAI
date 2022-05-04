@@ -11,14 +11,13 @@ from worker.task_base import TaskBase
 openai.api_key = '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'
 TO_EXTRACT = ['Categories', 'Keywords', 'Gender', 'Age Range']
 _TO_EXTRACT_JOINED = ', '.join(TO_EXTRACT)
-_OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\nTweet: "
+_OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\nTweet: " #  TODO: Optimize this prompt
 
 @shared_task(bind=True, name='text_analyzer')
-def text_analyzer(self: TaskBase, match_request_id: int) -> Dict:
-    """TODO: Optimize this method
+def text_analyzer(self: TaskBase, deep_request: str, node_id: int) -> Dict:
     """
-    match_request = '' # self.session.query(MatchRequest).get(match_request_id)
-    prompt = f"{_OPENAI_PROMPT}\"{match_request.raw_request}\""
+    """
+    prompt = f"{_OPENAI_PROMPT}\"{deep_request}\""
     logging.info(f'About to query OpenAI with the folloiwng prompt: "{prompt}"')
     response = openai.Completion.create(
         engine="text-davinci-002",

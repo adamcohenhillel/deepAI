@@ -29,9 +29,12 @@ class DeepRequestNode(_Neo4jNode):
     """
     label = 'DeepRequest'
 
-    def create(tx, raw_request) -> Any:
-        query =  "CREATE (node:DeepRequest { request: $raw_request }) RETURN node"
-        tx.run(query, raw_request=raw_request)
+    @staticmethod
+    def create(tx, raw_request) -> int:
+        query = "CREATE (node:DeepRequest { request: $raw_request }) RETURN ID(node) AS node_id"
+        result = tx.run(query, raw_request=raw_request)
+        record = result.single()
+        return record["node_id"]
 
 
 # class DescriberNode(_Neo4jNode):

@@ -20,7 +20,6 @@ def create_app():
     app.url_map.strict_slashes = False
     app.config.from_object('config.TestConfig' if os.getenv('TEST_MODE') else 'config.ProdConfig')
 
-
     jwt.init_app(app)
     db.init_app(app)
     with app.app_context():
@@ -33,6 +32,8 @@ def create_app():
     
     app.worker = create_celery_instance()
     app.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
+    # with app.neo4j.use_session():
+    #     set dependices
 
     ########################
     ##     BLUEPRINTS     ##

@@ -32,13 +32,13 @@ class DeepRequestResource(MethodView):
         user_id = get_jwt_identity()
         post_data = request.get_json() or {}
 
-        if 'raw_request' not in post_data:
-            raise BadRequest('raw_request must be provided')
+        if 'deep_request' not in post_data:
+            raise BadRequest('deep_request must be provided')
 
         with current_app.neo4j.use_session() as session:
-            session.write_transaction(DeepRequestNode.create, "WHATTT")
-        
-        # current_app.worker.send_task('text_analyzer', args=(new_request.id,))
+            new_node_id = session.write_transaction(DeepRequestNode.create, post_data['deep_request'])
+
+        current_app.worker.send_task('text_analyzer', args=(post_data['deep_request'], new_node_id,))
         return jsonify(msg='Created'), 201
     
     # def put(self):
