@@ -56,5 +56,5 @@ def add_describers_nodes(self: TaskBase, data: Dict, node_id) -> None:
     for label, values in data.items():
         for value in values:
             with self.neo4j.use_session() as session:
-                new_node_id = session.write_transaction(AdjectiveNode.create, value)
-                new_node_id = session.write_transaction(RequestAdjectiveRealtionship.create, node_id, new_node_id)
+                new_node_id = session.write_transaction(AdjectiveNode.create, adjective=value, key=label)
+                realtionship_id = session.write_transaction(RequestAdjectiveRealtionship.create, node_id, new_node_id)
