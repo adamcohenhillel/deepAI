@@ -4,6 +4,7 @@ import logging
 from typing import Dict
 import openai
 from celery import shared_task
+from core.neo4j.entities import AdjectiveNode, RequestAdjectiveRealtionship
 
 from worker.task_base import TaskBase
 
@@ -15,8 +16,8 @@ _TO_EXTRACT_JOINED = ', '.join(TO_EXTRACT)
 _OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\nTweet: "
 
 
-@shared_task(bind=True, name='text_analyzer')
-def text_analyzer(self: TaskBase, deep_request: str, node_id: int) -> Dict:
+@shared_task(bind=True, name='analyze.text_extraction')
+def text_extraction(self: TaskBase, deep_request: str, node_id: int) -> Dict:
     """
     """
     prompt = f"{_OPENAI_PROMPT}\"{deep_request}\""
@@ -48,8 +49,12 @@ def text_analyzer(self: TaskBase, deep_request: str, node_id: int) -> Dict:
     return found
 
 
-@shared_task(bind=True, name='add_to_database')
-def add_to_database(self, data: Dict) -> None:
+@shared_task(bind=True, name='analyze.add_describers_nodes')
+def add_describers_nodes(self: TaskBase, data: Dict, node_id) -> None:
     """
     """
-    pass
+    for label, values in data.items():
+        for value in values:
+            with self.neo4j.use_session() as session:
+                new_node_id = session.write_transaction(AdjectiveNode.create, value)
+                new_node_id = session.write_transaction(RequestAdjectiveRealtionship.create, node_id, new_node_id)

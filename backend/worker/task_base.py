@@ -6,6 +6,7 @@ from typing import Any
 from celery.contrib.abortable import AbortableTask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
+from core.neo4j.connector import Neo4jDBConnector
 from config import ProdConfig
 
 
@@ -17,6 +18,7 @@ class TaskBase(AbortableTask):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__()
+        self.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
 
     @property
     def session(self) -> Session:

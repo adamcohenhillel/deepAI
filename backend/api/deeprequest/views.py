@@ -7,9 +7,9 @@ from flask import Blueprint, jsonify, request, current_app
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from werkzeug.exceptions import BadRequest
-from core.neo4j.entities import DeepRequestNode
+from worker.pipelines import analyze_deep_request
 
-from core.ext import db
+from core.neo4j.entities import DeepRequestNode
 
 
 deeprequest_bp = Blueprint('deeprequest_bp', __name__)
@@ -39,9 +39,8 @@ class DeepRequestResource(MethodView):
             new_node_id = session.write_transaction(
                 DeepRequestNode.create, post_data['deep_request'])
 
-        current_app.worker.send_task('text_analyzer', args=(
-            post_data['deep_request'], new_node_id,))
-        return jsonify(msg='Created'), 201
+        analyze_deep_request(post_data['deep_request'], new_node_id, celery_app=current_app.worker)()
+        return jsonify(node=new_node_id), 201
 
     # def put(self):
     #     pass
@@ -50,5 +49,4 @@ class DeepRequestResource(MethodView):
     #     pass
 
 
-deeprequest_bp.add_url_rule(
-    '/', view_func=DeepRequestResource.as_view('deeprequest_resource'))
+deeprequest_bp.add_url_rule('/', view_func=DeepRequestResource.as_view('deeprequest_resource'))
