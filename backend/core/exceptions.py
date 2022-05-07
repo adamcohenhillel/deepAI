@@ -1,3 +1,3 @@
-"""Adam Cohen Hillel 2022, All Rights Reserved
+"""Deeper 2022, All Rights Reserved
 TODO: Add custom exceptions here
 """

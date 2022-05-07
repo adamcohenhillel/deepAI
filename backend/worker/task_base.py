@@ -1,4 +1,4 @@
-"""Adam Cohen Hillel 2022, All Rights Reserved
+"""Deeper 2022, All Rights Reserved
 """
 import logging
 from typing import Any
@@ -6,7 +6,8 @@ from typing import Any
 from celery.contrib.abortable import AbortableTask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
-from config import APIProdConfig
+from core.neo4j.connector import Neo4jDBConnector
+from config import ProdConfig
 
 
 class TaskBase(AbortableTask):
@@ -17,13 +18,14 @@ class TaskBase(AbortableTask):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__()
+        self.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
 
     @property
     def session(self) -> Session:
         """
         """
         if not self._session:
-            engine = create_engine(APIProdConfig.SQLALCHEMY_DATABASE_URI)  #TODO: Have different way for config
+            engine = create_engine(ProdConfig.SQLALCHEMY_DATABASE_URI)  #TODO: Have different way for config
             session = scoped_session(sessionmaker(bind=engine))()
             self._session = session
         return self._session

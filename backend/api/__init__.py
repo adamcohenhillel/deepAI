@@ -1,11 +1,12 @@
-"""Adam Cohen Hillel 2022, All Rights Reserved
+"""Deeper 2022, All Rights Reserved
 """
 import os
 
 from flask import Flask
 
+from core.neo4j.connector import Neo4jDBConnector
 from core.ext import db, jwt
-from api.matchmaker.views import matchmaker_bp
+from api.deeprequest.views import deeprequest_bp
 from api.users.views import users_bp
 from api.errors.handlers import errors_handlers_bp
 from api.users.models import User
@@ -17,13 +18,7 @@ def create_app():
     """
     app = Flask(__name__)
     app.url_map.strict_slashes = False
-
-    test_mode = os.getenv('TEST_MODE') or False
-    if test_mode:
-        app.config.from_object('config.APITestConfig')
-    else:
-        app.config.from_object('config.APIProdConfig')
-
+    app.config.from_object('config.TestConfig' if os.getenv('TEST_MODE') else 'config.ProdConfig')
 
     jwt.init_app(app)
     db.init_app(app)
@@ -36,9 +31,13 @@ def create_app():
         db.session.commit()
     
     app.worker = create_celery_instance()
+    app.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
+    # with app.neo4j.use_session():
+    #     set dependices
+
     ########################
     ##     BLUEPRINTS     ##
     app.register_blueprint(errors_handlers_bp)
-    app.register_blueprint(matchmaker_bp, url_prefix='/api/v1/matchmacker')
+    app.register_blueprint(deeprequest_bp, url_prefix='/api/v1/deeprequest')
     app.register_blueprint(users_bp, url_prefix='/api/v1/users')
     return app
