@@ -31,7 +31,7 @@ class DeepRequestNode(_Neo4jNode):
         return record["node_id"]
     
     @staticmethod
-    def find_matches(tx, deep_id):
+    def matched_nodes(tx, deep_id, number_of_related):
         query = """
         MATCH (d1:DeepRequest)-->(a:AdjectiveNode)<--(d2:DeepRequest)
         WHERE ID(d1) = $deep_id 
@@ -39,7 +39,7 @@ class DeepRequestNode(_Neo4jNode):
         WHERE size(related_adjectives) > $number_of_related
         RETURN d1, d2, related_adjectives
         """
-        result = tx.run(query, deep_id=deep_id)
+        result = tx.run(query, deep_id=deep_id, number_of_related=number_of_related)
         record = result.single()
         return record["node_id"]
 

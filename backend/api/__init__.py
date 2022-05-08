@@ -32,8 +32,6 @@ def create_app():
     
     app.worker = create_celery_instance()
     app.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
-    # with app.neo4j.use_session():
-    #     set dependices
 
     ########################
     ##     BLUEPRINTS     ##
