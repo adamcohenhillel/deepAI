@@ -1,63 +1,51 @@
 """Deeper 2022, All Rights Reserved
 """
-from flask import Blueprint, jsonify, request, current_app
-from flask.views import MethodView
-from flask_jwt_extended import create_access_token
-from werkzeug.exceptions import BadRequest
+
+from sanic import Blueprint
+from sanic.views import HTTPMethodView
+from sanic.response import json
 
 from api.users.models import User
 from api.users.schemas import UserSchema
-from core.neo4j.entities import DeepRequestNode
-from core.ext import db
-
 
 users_bp = Blueprint('users_bp', __name__)
 
 
-class UsersListResource(MethodView):
+class UsersListResource(HTTPMethodView):
     """
     """
 
-    def get(self):
-        # user_data = MatchRequest.query.filter_by().all()
+    async def get(self, request):
         pass
 
-    # TODO: Add some kind of authentication
-    def post(self):
+    async def post(self, request):
         """Create a new user
         """
-        post_data = request.get_json() or {}
-        validated_data = UserSchema().load(post_data)
-        new_user = User(**validated_data)
-        db.session.add(new_user)
-        db.session.commit()
-        return jsonify(msg='New user was created'), 201
-
-    def put(self):
-        pass
-
-    def delete(self):
-        pass
+        session = request.ctx.session
+        async with session.begin():
+            post_data = request.json or {}
+            new_user = User(**post_data)
+            session.add_all([new_user])
+        return json(msg='New user created')
 
 
-class AccessTokensResource(MethodView):
+class AccessTokensResource(HTTPMethodView):
     """Generate access tokens for users
     """
 
-    def post(self):
-        post_data = request.get_json() or {}
-        validated_data = UserSchema().load(post_data)
+    async def post(self):
+        # post_data = request.get_json() or {}
+        # validated_data = UserSchema().load(post_data)
 
-        user = User.query.filter_by(
-            username=validated_data['username']).first()
-        if not user:
-            raise BadRequest('Username or password are incorrect')
+        # user = User.query.filter_by(
+        #     username=validated_data['username']).first()
+        # if not user:
+        #     raise BadRequest('Username or password are incorrect')
 
-        access_token = create_access_token(identity=user.id)
-        return jsonify(access_token=access_token)
+        # access_token = create_access_token(identity=user.id)
+        return json(access_token='temp')
 
 
-users_bp.add_url_rule(
-    '/', view_func=UsersListResource.as_view('users_list_resource'))
-users_bp.add_url_rule(
-    '/auth', view_func=AccessTokensResource.as_view('users_auth_resource'))
+users_bp = Blueprint('users_bp', url_prefix='/users')
+users_bp.add_route(UsersListResource.as_view(), '/')
+users_bp.add_route(AccessTokensResource.as_view(), '/auth')

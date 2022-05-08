@@ -1,52 +1,35 @@
 """Deeper 2022, All Rights Reserved
 """
-import json
-import logging
-
-from flask import Blueprint, jsonify, request, current_app
-from flask.views import MethodView
-from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
-from werkzeug.exceptions import BadRequest
-from worker.pipelines import analyze_deep_request
+from sanic.views import HTTPMethodView
+from sanic.exceptions import InvalidUsage
+# from worker.pipelines import analyze_deep_request
+from sanic import Blueprint
+from sanic.response import json
 
 from core.neo4j.entities import DeepRequestNode
 
-
-deeprequest_bp = Blueprint('deeprequest_bp', __name__)
-
-
-class DeepRequestResource(MethodView):
+class DeepRequestResource(HTTPMethodView):
     """
     """
 
-    def get(self):
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
+    async def get(self, request):
         pass
 
-    # @jwt_required
-    def post(self):
+    async def post(self, request):
         """
         """
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
-        post_data = request.get_json() or {}
+        post_data = request.json or {}
 
         if 'deep_request' not in post_data:
-            raise BadRequest('deep_request must be provided')
+            raise InvalidUsage('deep_request must be provided')
 
-        with current_app.neo4j.use_session() as session:
+        with request.ctx.neo4j.use_session() as session:
             new_node_id = session.write_transaction(
                 DeepRequestNode.create, post_data['deep_request'])
 
-        analyze_deep_request(post_data['deep_request'], new_node_id, celery_app=current_app.worker)()
-        return jsonify(node=new_node_id), 201
-
-    # def put(self):
-    #     pass
-
-    # def delete(self):
-    #     pass
+        # analyze_deep_request(post_data['deep_request'], new_node_id, celery_app=current_app.worker)()
+        return json(node=new_node_id), 201
 
 
-deeprequest_bp.add_url_rule('/', view_func=DeepRequestResource.as_view('deeprequest_resource'))
+deeprequest_bp = Blueprint('deeprequest_bp', url_prefix='/deeprequest')
+deeprequest_bp.add_route(DeepRequestResource.as_view(), '/')
