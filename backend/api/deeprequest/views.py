@@ -1,29 +1,28 @@
 """Deeper 2022, All Rights Reserved
 """
 from sanic.views import HTTPMethodView
-from sanic.exceptions import InvalidUsage
-from tasks.pipelines import analyze_deep_request
+from sanic_ext import validate
 from sanic import Blueprint
 from sanic.response import json
 
+from api.deeprequest.schemas import DeepRequestSchema
 from core.neo4j.entities import DeepRequestNode
+from tasks.pipelines import analyze_deep_request
 
 
 class DeepRequestResource(HTTPMethodView):
-    """
+    """Resource to handle deep request 
     """
 
     async def get(self, request):
+        """Get all deep requests of a user (self)
+        """
         pass
-
-    async def post(self, request):
+    
+    @validate(json=DeepRequestSchema)
+    async def post(self, request, post_data):
+        """Create a new deep request
         """
-        """
-        post_data = request.json or {}
-
-        if 'deep_request' not in post_data:
-            raise InvalidUsage('deep_request must be provided')
-
         with request.ctx.neo4j.use_session() as session:
             new_node_id = session.write_transaction(
                 DeepRequestNode.create,
