@@ -1,10 +1,11 @@
 """Deeper 2022, All Rights Reserved
 """
-from marshmallow import Schema, fields
+from dataclasses import dataclass
 
 
-class UserSchema(Schema):
+@dataclass
+class UserSchema:
     """
     """
-    username = fields.String(required=True)
-    password = fields.String(required=True)
+    username: str
+    password: str

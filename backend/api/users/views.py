@@ -1,10 +1,9 @@
 """Deeper 2022, All Rights Reserved
 """
-
+from sanic_ext import validate
 from sanic import Blueprint
 from sanic.views import HTTPMethodView
 from sanic.response import json
-
 from api.users.models import User
 from api.users.schemas import UserSchema
 
@@ -16,17 +15,17 @@ class UsersListResource(HTTPMethodView):
     """
 
     async def get(self, request):
-        pass
+        return json(body={'message': 'not implemeneted just yet'})
 
+    # @validate(json=UserSchema)
     async def post(self, request):
         """Create a new user
         """
         session = request.ctx.session
         async with session.begin():
-            post_data = request.json or {}
-            new_user = User(**post_data)
+            new_user = User(**request.json)
             session.add_all([new_user])
-        return json(msg='New user created')
+        return json(body={'message':'New user created'})
 
 
 class AccessTokensResource(HTTPMethodView):
