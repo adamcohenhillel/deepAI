@@ -6,7 +6,7 @@ from sanic.views import HTTPMethodView
 from sanic.response import json
 from api.users.models import User
 from api.users.schemas import UserSchema
-
+from core.neo4j.entities import DeepRequestNode
 users_bp = Blueprint('users_bp', __name__)
 
 

@@ -1,28 +1,28 @@
 """Deeper 2022, All Rights Reserved
+
+TODO: Need to not be depended on OpenAI API, Too expensive
 """
 import logging
 from typing import Dict
+
 import openai
-from celery import shared_task
-from core.neo4j.entities import AdjectiveNode, RequestAdjectiveRealtionship
-
-from worker.task_base import TaskBase
-
 
 openai.api_key = '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'
 TO_EXTRACT = ['Categories', 'Keywords', 'Gender', 'Age Range']
 _TO_EXTRACT_JOINED = ', '.join(TO_EXTRACT)
-# TODO: Optimize this prompt
-_OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\nTweet: "
+_OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\nTweet: "  # TODO: Optimize this prompt
 
 
-@shared_task(bind=True, name='analyze.text_extraction')
-def text_extraction(self: TaskBase, deep_request: str, node_id: int) -> Dict:
-    """
+async def openai_text_extraction(deep_request: str) -> Dict:
+    """Calling OpenAI API with a prompt and extract
+    the relevant information out of it into a dict
+
+    :param str deep_request: A raw text to send to openai
+
+    :return:
     """
     prompt = f"{_OPENAI_PROMPT}\"{deep_request}\""
-    logging.info(
-        f'About to query OpenAI with the folloiwng prompt: "{prompt}"')
+    logging.info(f'About to query OpenAI with the folloiwng prompt: "{prompt}"')
     response = openai.Completion.create(
         engine="text-davinci-002",
         prompt=prompt,
@@ -47,14 +47,3 @@ def text_extraction(self: TaskBase, deep_request: str, node_id: int) -> Dict:
                     break
     logging.info(f'Extraction found:\n{found}')
     return found
-
-
-@shared_task(bind=True, name='analyze.add_describers_nodes')
-def add_describers_nodes(self: TaskBase, data: Dict, node_id) -> None:
-    """
-    """
-    for label, values in data.items():
-        for value in values:
-            with self.neo4j.use_session() as session:
-                new_node_id = session.write_transaction(AdjectiveNode.create, adjective=value, key=label)
-                realtionship_id = session.write_transaction(RequestAdjectiveRealtionship.create, node_id, new_node_id)

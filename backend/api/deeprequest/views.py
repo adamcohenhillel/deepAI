@@ -2,11 +2,12 @@
 """
 from sanic.views import HTTPMethodView
 from sanic.exceptions import InvalidUsage
-# from worker.pipelines import analyze_deep_request
+from tasks.pipelines import analyze_deep_request
 from sanic import Blueprint
 from sanic.response import json
 
 from core.neo4j.entities import DeepRequestNode
+
 
 class DeepRequestResource(HTTPMethodView):
     """
@@ -25,10 +26,12 @@ class DeepRequestResource(HTTPMethodView):
 
         with request.ctx.neo4j.use_session() as session:
             new_node_id = session.write_transaction(
-                DeepRequestNode.create, post_data['deep_request'])
+                DeepRequestNode.create,
+                post_data['deep_request']
+            )
 
-        # analyze_deep_request(post_data['deep_request'], new_node_id, celery_app=current_app.worker)()
-        return json(node=new_node_id), 201
+        request.app.add_task(analyze_deep_request(request.ctx.neo4j, post_data['deep_request'], new_node_id))
+        return json(body={'node': new_node_id}, status=201)
 
 
 deeprequest_bp = Blueprint('deeprequest_bp', url_prefix='/deeprequest')
