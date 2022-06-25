@@ -2,7 +2,7 @@
 """
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
-from sanic import Blueprint
+from sanic import Blueprint, Request
 from sanic.response import json
 
 from api.deeprequest.schemas import DeepRequestSchema
@@ -14,22 +14,22 @@ class DeepRequestResource(HTTPMethodView):
     """Resource to handle deep request 
     """
 
-    async def get(self, request):
+    async def get(self, request: Request):
         """Get all deep requests of a user (self)
         """
         pass
-    
+
     @validate(json=DeepRequestSchema)
-    async def post(self, request, post_data):
+    async def post(self, request: Request, body: DeepRequestSchema):
         """Create a new deep request
         """
         with request.ctx.neo4j.use_session() as session:
             new_node_id = session.write_transaction(
                 DeepRequestNode.create,
-                post_data['deep_request']
+                body.deep_request
             )
 
-        request.app.add_task(analyze_deep_request(request.ctx.neo4j, post_data['deep_request'], new_node_id))
+        request.app.add_task(analyze_deep_request(request.ctx.neo4j, body.deep_request, new_node_id))
         return json(body={'node': new_node_id}, status=201)
 
 

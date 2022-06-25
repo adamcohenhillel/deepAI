@@ -11,8 +11,18 @@ async def catch_integrity_error(request, exception):
     return json(body={'message': 'Resource exists already'}, status=400)
 
 
+async def catch_validation_error(request, exception):
+    """
+    """
+    logging.exception(exception)
+    return json(body={'message': 'Invalid request body'}, status=400)
+
+
 async def catch_anything(request, exception):
     """High level exception handler for all exceptions
     """
     logging.exception(exception)
     return json(body={'message': 'Unhandled Internal Server Error'}, status=500)
+
+
+    sanic_ext.exceptions.ValidationError
