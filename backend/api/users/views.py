@@ -1,12 +1,17 @@
 """Deeper 2022, All Rights Reserved
 """
-from sanic_ext import validate
-from sanic import Blueprint
+from sanic import Blueprint, Request
 from sanic.views import HTTPMethodView
 from sanic.response import json
+from sanic_ext import validate
+from sanic_jwt.exceptions import AuthenticationFailed
+from sqlalchemy.future import select
+
 from api.users.models import User
 from api.users.schemas import UserSchema
 from core.neo4j.entities import DeepRequestNode
+
+
 users_bp = Blueprint('users_bp', __name__)
 
 
@@ -14,10 +19,7 @@ class UsersListResource(HTTPMethodView):
     """
     """
 
-    async def get(self, request):
-        return json(body={'message': 'not implemeneted just yet'})
-
-    # @validate(json=UserSchema)
+    @validate(json=UserSchema)
     async def post(self, request):
         """Create a new user
         """
@@ -28,23 +30,25 @@ class UsersListResource(HTTPMethodView):
         return json(body={'message':'New user created'})
 
 
-class AccessTokensResource(HTTPMethodView):
-    """Generate access tokens for users
+async def authenticate(request: Request):
+    """Authentricate user based on username and password
     """
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
 
-    async def post(self):
-        # post_data = request.get_json() or {}
-        # validated_data = UserSchema().load(post_data)
+    if not (username or password):
+        raise AuthenticationFailed('Missing username or password')
 
-        # user = User.query.filter_by(
-        #     username=validated_data['username']).first()
-        # if not user:
-        #     raise BadRequest('Username or password are incorrect')
-
-        # access_token = create_access_token(identity=user.id)
-        return json(access_token='temp')
+    async with request.ctx.session.begin():
+        query = select(User).where(User.username == username)
+        result = await request.ctx.session.execute(query)
+        user: User = result.scalars().first()
+        
+    if user is None or password != user.password:
+        raise AuthenticationFailed("Username or password are incorrect")
+    else:
+        return {'user_id': user.id, 'username': user.username}
 
 
 users_bp = Blueprint('users_bp', url_prefix='/users')
 users_bp.add_route(UsersListResource.as_view(), '/')
-users_bp.add_route(AccessTokensResource.as_view(), '/auth')
