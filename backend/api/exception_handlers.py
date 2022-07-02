@@ -25,4 +25,9 @@ async def default_error_handler(_: Request, exception: Exception) -> HTTPRespons
     """High level exception handler for all exceptions
     """
     logging.exception(exception)
-    return json(body={'message': 'Unhandled Internal Server Error'}, status=500)
+    print('***************>>>')
+    print('***************>>>')
+    print(exception)
+    print('***************>>>')
+    print('***************>>>')
+    return json(body={'message': 'Unhandled Internal Server Error2'}, status=500)

@@ -27,7 +27,7 @@ class UsersListResource(HTTPMethodView):
         async with session.begin():
             new_user = User(username=body.username, password=body.password)
             session.add_all([new_user])
-        return json(body={'message':'New user created'})
+        return json(body={'message': 'Created'}, status=201)
 
 
 async def authenticate(request: Request):

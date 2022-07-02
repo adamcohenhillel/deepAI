@@ -1,18 +1,18 @@
 """Deeper 2022, All Rights Reserved
 """
+import pytest
+
+from sanic import Sanic
 from tests.fixtures import api_app
     
-class TestUsersAPI:
-    """Tests the api.users application
-    """
 
-    def test_get_all_users(self, api_app):
-        # request, response = sanic_app.test_client.post(
-        #     '/v1/users',
-        #     json={'password': '1234', 'username': 'banana'}
-        # )
-        pass
-        # assert response.body == b"foo"
+async def test_get_all_users(api_app):
+    _, response = await api_app.asgi_client.post(
+        '/v1/users',
+        json={'password': '1234', 'username': 'banana'}
+    )
+    assert response.status == 201
+    assert response.json == {'message': 'Created'}
 
 
 class TestUserAuthentication:
