@@ -75,6 +75,5 @@ jobs:
 
     - name: Unit Tests
       run: |
-        pip install pytest sanic-testing
-
-        pytest
+        pip install pytest sanic-testing pytest-asyncio
+        pytest --asyncio-mode=auto
