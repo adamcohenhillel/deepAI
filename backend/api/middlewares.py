@@ -9,7 +9,7 @@ from core.neo4j.connector import Neo4jDBConnector
 from api.users.models import User
 
 
-engine = create_async_engine('sqlite+aiosqlite:////Users/adamcohenhillel/Desktop/projects/deeper/test.db', echo=True)
+engine = create_async_engine('postgresql+asyncpg://postgres:12345678@localhost/postgres', echo=True)
 _base_model_session_ctx: ContextVar = ContextVar("session")
 
 
