@@ -27,3 +27,4 @@ Tasks:
 [ ] Write tests
 [ ] Add docstrings for everything
 [ ] Going over code standtards: Types, import order, (Add to checks)
+[ ] Add timestamps to the neo4j nodes (to be able to filteer better when matching)

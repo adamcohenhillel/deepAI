@@ -9,3 +9,5 @@ sqlalchemy[asyncio]==1.4.32
 aiosqlite==0.17.0
 asyncpg==0.25.0
 neo4j==4.4.3
+
+sanic-testing==22.6.0

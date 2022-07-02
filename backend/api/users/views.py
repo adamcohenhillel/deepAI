@@ -2,7 +2,7 @@
 """
 from sanic import Blueprint, Request
 from sanic.views import HTTPMethodView
-from sanic.response import json
+from sanic.response import json, HTTPResponse
 from sanic_ext import validate
 from sanic_jwt.exceptions import AuthenticationFailed
 from sqlalchemy.future import select
@@ -20,12 +20,12 @@ class UsersListResource(HTTPMethodView):
     """
 
     @validate(json=UserSchema)
-    async def post(self, request):
+    async def post(self, request: Request, body: UserSchema) -> HTTPResponse:
         """Create a new user
         """
         session = request.ctx.session
         async with session.begin():
-            new_user = User(**request.json)
+            new_user = User(username=body.username, password=body.password)
             session.add_all([new_user])
         return json(body={'message':'New user created'})
 
@@ -51,4 +51,4 @@ async def authenticate(request: Request):
 
 
 users_bp = Blueprint('users_bp', url_prefix='/users')
-users_bp.add_route(UsersListResource.as_view(), '/')
+users_bp.add_route(UsersListResource.as_view(), '/', methods=['POST'])
