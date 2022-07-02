@@ -14,7 +14,7 @@ from api import exception_handlers
 
 
 def create_app():
-    """
+    """Create a new Sanic app instance
     """
     app = Sanic(__name__, config=AppConfig())
 

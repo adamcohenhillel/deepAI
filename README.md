@@ -19,3 +19,11 @@ Socializing without
 
 Danger with this platform:
 Groups and individuals that find eachother and
+
+
+Tasks:
+[ ] Adding authentication
+[ ] Writing CI/CD pipelines
+[ ] Write tests
+[ ] Add docstrings for everything
+[ ] Going over code standtards: Types, import order, (Add to checks)

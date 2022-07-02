@@ -3,7 +3,7 @@
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
 from sanic import Blueprint, Request
-from sanic.response import json
+from sanic.response import json, HTTPResponse
 from sanic_jwt import protected
 
 from api.deeprequest.schemas import DeepRequestSchema
@@ -15,14 +15,14 @@ class DeepRequestResource(HTTPMethodView):
     """Resource to handle deep request 
     """
 
-    async def get(self, request: Request):
+    async def get(self, request: Request) -> HTTPResponse:
         """Get all deep requests of a user (self)
         """
         pass
     
     @protected()
     @validate(json=DeepRequestSchema)
-    async def post(self, request: Request, body: DeepRequestSchema):
+    async def post(self, request: Request, body: DeepRequestSchema) -> HTTPResponse:
         """Create a new deep request
         """
         with request.ctx.neo4j.use_session() as session:
