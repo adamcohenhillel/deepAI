@@ -1,6 +1,6 @@
 """Deeper 2022, All Rights Reserved
 """
-from tests.api.base import ApiTestCase
+# from tests.api.base import ApiTestCase
 
-class UsersListResourceTests(ApiTestCase):
-    pass
+# class UsersListResourceTests(ApiTestCase):
+#     pass
