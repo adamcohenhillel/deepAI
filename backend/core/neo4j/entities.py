@@ -1,7 +1,6 @@
 """ORM-like approach to neo4j nodes
 """
 from abc import ABC, abstractmethod
-from typing import Any
 
 
 class _Neo4jNode(ABC):
@@ -30,6 +29,19 @@ class DeepRequestNode(_Neo4jNode):
         result = tx.run(query, raw_request=raw_request)
         record = result.single()
         return record["node_id"]
+    
+    @staticmethod
+    def matched_nodes(tx, deep_id, number_of_related):
+        query = """
+        MATCH (d1:DeepRequest)-->(a:AdjectiveNode)<--(d2:DeepRequest)
+        WHERE ID(d1) = $deep_id 
+        WITH d1, d2, collect(a) as related_adjectives
+        WHERE size(related_adjectives) > $number_of_related
+        RETURN d1, d2, related_adjectives
+        """
+        result = tx.run(query, deep_id=deep_id, number_of_related=number_of_related)
+        record = result.single()
+        return record["node_id"]
 
 
 class AdjectiveNode(_Neo4jNode):
@@ -38,9 +50,9 @@ class AdjectiveNode(_Neo4jNode):
     label = "AdjectiveNode"
     
     @staticmethod
-    def create(tx, value) -> int:
-        query = "MERGE (n:AdjectiveNode { adjective: $value }) RETURN ID(n) AS node_id"
-        result = tx.run(query, value=value)
+    def create(tx, adjective, key) -> int:
+        query = "MERGE (n:AdjectiveNode { adjective: $adjective, key: $key }) RETURN ID(n) AS node_id"
+        result = tx.run(query, adjective=adjective, key=key)
         record = result.single()
         return record["node_id"]
 

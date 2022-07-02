@@ -1,19 +1,13 @@
 #API:
-Flask==2.0.3
-marshmallow==3.15.0
-flask-jwt-extended==4.3.1
-
-# Workers
-celery==5.2.3
+sanic[ext]==22.3.1
 
 # Text Analyzer
-nltk==3.7
 openai==0.18.0
 
 # DBs:
-Flask-SQLAlchemy==s2.5.1
-SQLAlchemy==1.4.32
-redis==4.1.4
+sqlalchemy[asyncio]==1.4.32
+aiosqlite==0.17.0
+asyncpg==0.25.0
 neo4j==4.4.3
 
 #CI:

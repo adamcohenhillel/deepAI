@@ -1,43 +1,39 @@
 """Deeper 2022, All Rights Reserved
 """
-import os
+from sanic import Sanic, Blueprint
+from sanic.exceptions import SanicException
+from sanic_jwt import Initialize
+from sqlalchemy.exc import IntegrityError
 
-from flask import Flask
-
-from core.neo4j.connector import Neo4jDBConnector
-from core.ext import db, jwt
+from config import AppConfig
 from api.deeprequest.views import deeprequest_bp
 from api.users.views import users_bp
-from api.errors.handlers import errors_handlers_bp
-from api.users.models import User
-from worker import create_celery_instance
+from api.users.views import authenticate
+from api.middlewares import inject_session, close_session, create_db_engine
+from api import exception_handlers 
 
 
 def create_app():
+    """Create a new Sanic app instance
     """
-    """
-    app = Flask(__name__)
-    app.url_map.strict_slashes = False
-    app.config.from_object('config.TestConfig' if os.getenv('TEST_MODE') else 'config.ProdConfig')
-
-    jwt.init_app(app)
-    db.init_app(app)
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-
-        # Create a test user for now TODO: Delete ME!
-        db.session.add(User(username='admin', password='12345678'))
-        db.session.commit()
-    
-    app.worker = create_celery_instance()
-    app.neo4j = Neo4jDBConnector("bolt://localhost:7687", "neo4j", "12345678")
-    # with app.neo4j.use_session():
-    #     set dependices
+    app = Sanic(__name__, config=AppConfig())
 
     ########################
     ##     BLUEPRINTS     ##
-    app.register_blueprint(errors_handlers_bp)
-    app.register_blueprint(deeprequest_bp, url_prefix='/api/v1/deeprequest')
-    app.register_blueprint(users_bp, url_prefix='/api/v1/users')
+    api_blueprints = Blueprint.group(
+        deeprequest_bp,
+        users_bp,
+
+        version='v1'
+    )
+    app.blueprint(api_blueprints)
+    
+    app.register_listener(create_db_engine, "after_server_start")
+    app.register_middleware(inject_session, "request")
+    app.register_middleware(close_session, "response")
+    app.error_handler.add(Exception, exception_handlers.default_error_handler)
+    app.error_handler.add(IntegrityError, exception_handlers.integrity_error_handler)
+    app.error_handler.add(SanicException, exception_handlers.sanic_http_errors_handler)
+
+    Initialize(app, authenticate=authenticate, url_prefix='/v1/auth')
     return app

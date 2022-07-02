@@ -1,52 +1,39 @@
 """Deeper 2022, All Rights Reserved
 """
-import json
-import logging
+from sanic.views import HTTPMethodView
+from sanic_ext import validate
+from sanic import Blueprint, Request
+from sanic.response import json, HTTPResponse
+from sanic_jwt import protected
 
-from flask import Blueprint, jsonify, request, current_app
-from flask.views import MethodView
-from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
-from werkzeug.exceptions import BadRequest
-from worker.pipelines import analyze_deep_request
-
+from api.deeprequest.schemas import DeepRequestSchema
 from core.neo4j.entities import DeepRequestNode
+from tasks.pipelines import analyze_deep_request
 
 
-deeprequest_bp = Blueprint('deeprequest_bp', __name__)
-
-
-class DeepRequestResource(MethodView):
-    """
+class DeepRequestResource(HTTPMethodView):
+    """Resource to handle deep request 
     """
 
-    def get(self):
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
+    async def get(self, request: Request) -> HTTPResponse:
+        """Get all deep requests of a user (self)
+        """
         pass
-
-    # @jwt_required
-    def post(self):
+    
+    @protected()
+    @validate(json=DeepRequestSchema)
+    async def post(self, request: Request, body: DeepRequestSchema) -> HTTPResponse:
+        """Create a new deep request
         """
-        """
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
-        post_data = request.get_json() or {}
-
-        if 'deep_request' not in post_data:
-            raise BadRequest('deep_request must be provided')
-
-        with current_app.neo4j.use_session() as session:
+        with request.ctx.neo4j.use_session() as session:
             new_node_id = session.write_transaction(
-                DeepRequestNode.create, post_data['deep_request'])
+                DeepRequestNode.create,
+                body.deep_request
+            )
 
-        analyze_deep_request(post_data['deep_request'], new_node_id, celery_app=current_app.worker)()
-        return jsonify(node=new_node_id), 201
-
-    # def put(self):
-    #     pass
-
-    # def delete(self):
-    #     pass
+        request.app.add_task(analyze_deep_request(request.ctx.neo4j, body.deep_request, new_node_id))
+        return json(body={'node': new_node_id}, status=201)
 
 
-deeprequest_bp.add_url_rule('/', view_func=DeepRequestResource.as_view('deeprequest_resource'))
+deeprequest_bp = Blueprint('deeprequest_bp', url_prefix='/deeprequest')
+deeprequest_bp.add_route(DeepRequestResource.as_view(), '/')
