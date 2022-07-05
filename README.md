@@ -30,4 +30,5 @@ Tasks:
 [ ] Add timestamps to the neo4j nodes (to be able to filteer better when matching)
 [ ] Build match maker functionality
 [ ] Build rooms/chat functionality for matches^
+[ ] Use config and env vars for database urls
 

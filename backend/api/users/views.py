@@ -1,5 +1,6 @@
 """Deeper 2022, All Rights Reserved
 """
+from typing import Dict
 from sanic import Blueprint, Request
 from sanic.views import HTTPMethodView
 from sanic.response import json, HTTPResponse
@@ -9,7 +10,6 @@ from sqlalchemy.future import select
 
 from api.users.models import User
 from api.users.schemas import UserSchema
-from core.neo4j.entities import DeepRequestNode
 
 
 users_bp = Blueprint('users_bp', __name__)
@@ -30,7 +30,7 @@ class UsersListResource(HTTPMethodView):
         return json(body={'message': 'Created'}, status=201)
 
 
-async def authenticate(request: Request):
+async def authenticate(request: Request) -> Dict:
     """Authentricate user based on username and password
     """
     username = request.json.get('username', None)
@@ -42,8 +42,8 @@ async def authenticate(request: Request):
     async with request.ctx.session.begin():
         query = select(User).where(User.username == username)
         result = await request.ctx.session.execute(query)
-        user: User = result.scalars().first()
-        
+        user = result.scalar()
+    
     if user is None or password != user.password:
         raise AuthenticationFailed("Username or password are incorrect")
     else:

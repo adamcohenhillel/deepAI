@@ -9,12 +9,17 @@ class User(Base):
     """
     """
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
+
+    id: int = Column(Integer, primary_key=True)
+    username: str  = Column(String, nullable=False, unique=True)
+    password: str = Column(String, nullable=False)
+
     # TODO: Add email? some identiney verification?
     # TODO: Add back relationship to matches
 
-    def __init__(self, username, password) -> None:
+    def __init__(self, username: str, password: str) -> None:
         self.username = username
         self.password = password
+    
+    def __repr__(self) -> str:
+        return f'<User {self.username} ({self.id})'

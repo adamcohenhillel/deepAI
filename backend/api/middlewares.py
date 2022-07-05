@@ -6,24 +6,15 @@ from sqlalchemy.orm import sessionmaker
 
 from core.ext import Base
 from core.neo4j.connector import Neo4jDBConnector
-from api.users.models import User
 
 
-engine = create_async_engine('postgresql+asyncpg://postgres:12345678@localhost/postgres', echo=True)
+engine = create_async_engine('sqlite+aiosqlite:////Users/adamcohenhillel/Desktop/projects/deeper/test.db', echo=True)
 _base_model_session_ctx: ContextVar = ContextVar("session")
 
 
 async def create_db_engine(app: Any, loop: Any) -> None:
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)  # DELETE
         await conn.run_sync(Base.metadata.create_all)
-
-    # DELETE:
-    async_session = sessionmaker(engine, AsyncSession, expire_on_commit=False)
-    async with async_session() as session:
-        async with session.begin():
-            session.add_all([User(username='admin', password='12345678')])
-            await session.commit()
 
 
 async def inject_session(request: Any) -> None:

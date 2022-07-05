@@ -35,5 +35,5 @@ def create_app():
     app.error_handler.add(IntegrityError, exception_handlers.integrity_error_handler)
     app.error_handler.add(SanicException, exception_handlers.sanic_http_errors_handler)
 
-    Initialize(app, authenticate=authenticate, url_prefix='/v1/auth')
+    Initialize(app, authenticate=authenticate, url_prefix='/v1/auth', secret='kukuk')
     return app
