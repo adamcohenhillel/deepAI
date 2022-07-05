@@ -4,6 +4,7 @@ from typing import Dict
 from sanic import Blueprint, Request
 from sanic.views import HTTPMethodView
 from sanic.response import json, HTTPResponse
+from sanic.exceptions import HeaderNotFound
 from sanic_ext import validate
 from sanic_jwt.exceptions import AuthenticationFailed
 from sqlalchemy.future import select
@@ -33,6 +34,9 @@ class UsersListResource(HTTPMethodView):
 async def authenticate(request: Request) -> Dict:
     """Authentricate user based on username and password
     """
+    if not request.json:
+        raise HeaderNotFound('Json must be provided') 
+
     username = request.json.get('username', None)
     password = request.json.get('password', None)
 
