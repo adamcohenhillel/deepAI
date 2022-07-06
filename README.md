@@ -31,4 +31,4 @@ Tasks:
 [ ] Build match maker functionality
 [ ] Build rooms/chat functionality for matches^
 [ ] Use config and env vars for database urls
-
+[ ] Admin panel
