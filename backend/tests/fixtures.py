@@ -1,5 +1,6 @@
 """Deeper 2022, All Rights Reserved
 """
+import logging
 from typing import Tuple
 import pytest
 from sanic import Sanic
@@ -12,7 +13,7 @@ from api.users.models import User
 from core.ext import Base
 
 
-GenericTestSetup = Tuple[Sanic, AsyncSession]
+GenericTestSetup = Tuple[Sanic, AsyncSession, str]
 
 
 @pytest.fixture(autouse=True)
@@ -23,6 +24,7 @@ async def generic_test_setup() -> GenericTestSetup:
         - Return a async database session
         - return
     """
+    logging.info('Setting up test with geenric setup')
     engine = create_async_engine(get_current_config().DATABASE_URI, echo=True)
 
     async with engine.begin() as conn:
@@ -35,4 +37,8 @@ async def generic_test_setup() -> GenericTestSetup:
             session.add_all([User(username='test_user', password='Aa12345678!')])
             await session.commit()
 
-    return create_app(), async_session
+    api_app = create_app()
+    _, response = await api_app.asgi_client.post('/v1/auth', json={'password': 'Aa12345678!', 'username': 'test_user'})
+    access_token = response.json.get('access_token', '')
+    logging.info('Setup Ended')
+    return api_app, async_session, access_token
