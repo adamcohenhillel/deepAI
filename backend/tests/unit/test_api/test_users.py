@@ -3,7 +3,7 @@
 from tests.fixtures import generic_test_setup, GenericTestSetup
     
 
-async def test_create_new_user(generic_test_setup: GenericTestSetup) -> None:
+async def test_create_new_user_success(generic_test_setup: GenericTestSetup) -> None:
     api_app, _ = generic_test_setup
     _, response = await api_app.asgi_client.post(
         '/v1/users',
@@ -11,6 +11,24 @@ async def test_create_new_user(generic_test_setup: GenericTestSetup) -> None:
     )
     assert response.status == 201
     assert response.json == {'message': 'Created'}
+
+
+async def test_create_new_user_existing_username(generic_test_setup: GenericTestSetup) -> None:
+    api_app, _ = generic_test_setup
+    _, response = await api_app.asgi_client.post(
+        '/v1/users',
+        json={'password': 'Aa12345678@', 'username': 'test_user'}
+    )
+    assert response.status == 400
+
+
+async def test_create_new_user_week_password(generic_test_setup: GenericTestSetup) -> None:
+    api_app, _ = generic_test_setup
+    _, response = await api_app.asgi_client.post(
+        '/v1/users',
+        json={'password': 'week', 'username': 'banana'}
+    )
+    assert response.status == 400
 
 
 async def test_authentication_success(generic_test_setup: GenericTestSetup) -> None:

@@ -17,7 +17,7 @@ users_bp = Blueprint('users_bp', __name__)
 
 
 class UsersListResource(HTTPMethodView):
-    """
+    """Interacting with the Users model
     """
 
     @validate(json=UserSchema)
@@ -32,7 +32,13 @@ class UsersListResource(HTTPMethodView):
 
 
 async def authenticate(request: Request) -> Dict:
-    """Authentricate user based on username and password
+    """Authentricate user based on username and password.
+    This function is being used by sanic-jwt extention - 
+    in the Sanic create_app, when we Initalize
+
+    :param request: The request, route: /v1/auth (this is defined in the)
+    
+    :return: A dict with the details to story in the JWT payload
     """
     if not request.json:
         raise HeaderNotFound('Json must be provided') 
