@@ -32,7 +32,7 @@ async def generic_test_setup() -> GenericTestSetup:
     async_session = sessionmaker(engine, AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         async with session.begin():
-            session.add_all([User(username='test_user', password='12345678')])
+            session.add_all([User(username='test_user', password='Aa12345678!')])
             await session.commit()
 
     return create_app(), async_session
