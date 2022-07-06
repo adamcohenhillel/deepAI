@@ -5,10 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from core.ext import Base
+from config import get_current_config
 from core.neo4j.connector import Neo4jDBConnector
 
 
-engine = create_async_engine('sqlite+aiosqlite:////Users/adamcohenhillel/Desktop/projects/deeper/test.db', echo=True)
+engine = create_async_engine(get_current_config().DATABASE_URI, echo=True)
 _base_model_session_ctx: ContextVar = ContextVar("session")
 
 

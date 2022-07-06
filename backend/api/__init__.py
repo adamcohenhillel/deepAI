@@ -5,7 +5,7 @@ from sanic.exceptions import SanicException
 from sanic_jwt import Initialize
 from sqlalchemy.exc import IntegrityError
 
-from config import AppConfig
+from config import get_current_config
 from api.deeprequest.views import deeprequest_bp
 from api.users.views import users_bp
 from api.users.views import authenticate
@@ -13,10 +13,10 @@ from api.middlewares import inject_session, close_session, create_db_engine
 from api import exception_handlers 
 
 
-def create_app():
+def create_app() -> Sanic:
     """Create a new Sanic app instance
     """
-    app = Sanic(__name__, config=AppConfig())
+    app = Sanic(__name__, config=get_current_config())
 
     ########################
     ##     BLUEPRINTS     ##

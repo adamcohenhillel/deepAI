@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from api import create_app
+from config import get_current_config
 from api.users.models import User
 from core.ext import Base
 
@@ -22,7 +23,7 @@ async def generic_test_setup() -> GenericTestSetup:
         - Return a async database session
         - return
     """
-    engine = create_async_engine('sqlite+aiosqlite:////Users/adamcohenhillel/Desktop/projects/deeper/test.db', echo=True)
+    engine = create_async_engine(get_current_config().DATABASE_URI, echo=True)
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
