@@ -23,4 +23,4 @@ class ProdConfig(_AppConfig):
 def get_current_config():
     """Returns the config class to use
     """
-    return DevConfig if os.environ.get('DEV_MODE') else ProdConfig
+    return DevConfig() if os.environ.get('DEV_MODE') else ProdConfig()
