@@ -1,7 +1,7 @@
 """Deeper 2022, All Rights Reserved
 """
 import logging
-from typing import Tuple
+from typing import AsyncGenerator, Tuple
 import pytest
 from sanic import Sanic
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -13,11 +13,15 @@ from api.users.models import User
 from core.ext import Base
 
 
-GenericTestSetup = Tuple[Sanic, AsyncSession, str]
+GenericTestSetup = AsyncGenerator[Tuple[Sanic, AsyncSession, str]]
+
+@pytest.fixture(scope='session')
+async def api_app() -> Sanic:
+    return create_app()
 
 
-@pytest.fixture(autouse=True)
-async def generic_test_setup() -> GenericTestSetup:
+@pytest.fixture()
+async def generic_test_setup(api_app: Sanic) -> GenericTestSetup:
     """Set up environment for tests:
         - Clean database
         - Create a test user
@@ -40,7 +44,6 @@ async def generic_test_setup() -> GenericTestSetup:
             session.add_all([User(username='test_user', password='Aa12345678!')])
             await session.commit()
 
-    api_app = create_app()
     _, response = await api_app.asgi_client.post('/v1/auth', json={'password': 'Aa12345678!', 'username': 'test_user'})
     access_token = response.json.get('access_token', '')
     logging.info('Setup nded')
