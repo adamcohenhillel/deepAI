@@ -25,6 +25,9 @@ async def generic_test_setup() -> GenericTestSetup:
         - return
     """
     logging.info('Setting up test with geenric setup')
+    print('********************')
+    print(get_current_config().DATABASE_URI)
+    print('********************')
     engine = create_async_engine(get_current_config().DATABASE_URI, echo=True)
 
     async with engine.begin() as conn:
