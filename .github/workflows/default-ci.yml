@@ -76,4 +76,4 @@ jobs:
     - name: Unit Tests
       run: |
         cd backend
-        pytest --asyncio-mode=auto
+        python -m pytest --asyncio-mode=auto

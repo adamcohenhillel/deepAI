@@ -16,7 +16,7 @@ from core.ext import Base
 GenericTestSetup = Tuple[Sanic, AsyncSession, str]
 
 
-@pytest.fixture(autouse=True, scope='module')
+@pytest.fixture(autouse=True)
 async def generic_test_setup() -> GenericTestSetup:
     """Set up environment for tests:
         - Clean database
