@@ -43,5 +43,7 @@ async def generic_test_setup() -> GenericTestSetup:
     api_app = create_app()
     _, response = await api_app.asgi_client.post('/v1/auth', json={'password': 'Aa12345678!', 'username': 'test_user'})
     access_token = response.json.get('access_token', '')
-    logging.info('Setup Ended')
-    return api_app, async_session, access_token
+    logging.info('Setup nded')
+    yield api_app, async_session, access_token
+    # tearDown:
+    async_session.close()

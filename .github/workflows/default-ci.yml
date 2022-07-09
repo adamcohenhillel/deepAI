@@ -55,7 +55,7 @@ jobs:
           --health-retries 5
 
     steps:
-    - name: Checkout Repo (${{ github.event.head_commit.message }})
+    - name: Checkout Repo
       uses: actions/checkout@v3
 
     - name: Set up Python 3.10
