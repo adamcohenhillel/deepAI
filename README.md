@@ -32,3 +32,9 @@ Tasks:
 [ ] Build rooms/chat functionality for matches^
 [ ] Use config and env vars for database urls
 [ ] Admin panel
+
+Deployment stratergy
+[ ] No redis. no celery
+[ ] Sanic dockerized on AWS ECS
+[ ] Terraform script that used in ci to release new docker
+[ ] Terraform script that manages 
