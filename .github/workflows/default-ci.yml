@@ -17,15 +17,15 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: 12345678
+          POSTGRES_PASSWORD: postgrespw
+          POSTGRES_PORT: 55000
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
+          - 55000:55000  # Maps tcp port 55000 on service container to the host
       neo4j:
         image: neo4j:4.2.0-enterprise
         env:
