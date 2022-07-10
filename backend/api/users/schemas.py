@@ -1,27 +1,19 @@
 """Deeper 2022, All Rights Reserved
 """
 import re
-from dataclasses import dataclass
-from typing import Any
 
-from sanic.exceptions import InvalidUsage
+from pydantic import BaseModel, validator
 
 
-@dataclass
-class UserSchema:
+class UserSchema(BaseModel):
     """
     """
     username: str
     password: str
 
-    def __setattr__(self, attr: str, value: Any) -> None:
-        """Validating the schema
-
-        :param attr: schema attribute key
-        :param value: schema attribute value
-        """
-        if attr == 'password':
-            regex = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
-            if not regex.search(value):
-                raise InvalidUsage('Password too week, minimum eight characters, at least one letter and one number')
-        self.__dict__[attr] = value
+    @validator('password')
+    def strong_password(cls, value, values):
+        regex = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
+        if not regex.search(value):
+            raise ValueError('Password too week, minimum eight characters, at least one letter and one number')
+        return value
