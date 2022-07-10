@@ -1,23 +1,6 @@
-import enum
-from pathlib import Path
-from tempfile import gettempdir
-from typing import Optional
-
+"""Deeper 2022, All Rights Reserved
+"""
 from pydantic import BaseSettings
-
-
-TEMP_DIR = Path(gettempdir())
-
-
-class LogLevel(str, enum.Enum):  # noqa: WPS600
-    """Possible log levels."""
-
-    NOTSET = "NOTSET"
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    FATAL = "FATAL"
 
 
 class Settings(BaseSettings):
@@ -30,23 +13,18 @@ class Settings(BaseSettings):
 
     host: str = "127.0.0.1"
     port: int = 8000
-    # quantity of workers for uvicorn
-    workers_count: int = 1
-    # Enable uvicorn reloading
-    reload: bool = False
-
+    workers_count: int = 1  # quantity of workers for uvicorn
+    reload: bool = False  # Enable uvicorn reloading
+    db_echo: bool = False
+    
     # Current environment
     environment: str = "dev"
+    db_url = 'postgresql+asyncpg://postgres:postgrespw@localhost:5433/postgres'
 
-
-    @property
-    def db_url(self) -> str:
-        """
-        Assemble database URL from settings.
-
-        :return: database URL.
-        """
-        return 'postgresql+asyncpg://postgres:postgrespw@localhost:5433/postgres'
+    neo4j_uri = 'bolt://localhost:7687'
+    neo4j_user = 'neo4j'
+    neo4j_password = '12345678'
+    redis_url = ''
 
 
     class Config:

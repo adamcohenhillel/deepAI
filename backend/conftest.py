@@ -5,8 +5,9 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from db.neo4j.connector import Neo4jDBConnector
 
-from db.session import get_db_session
+from db.session import get_db_session, get_neo4j_connector
 from db.models.base import Base
 from settings import settings
 from api.application import get_app
@@ -29,7 +30,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
     :yield: new engine.
     """
-    engine = create_async_engine(str(settings.db_url))
+    engine = create_async_engine(settings.db_url)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -83,6 +84,7 @@ def fastapi_app(
     """
     application = get_app()
     application.dependency_overrides[get_db_session] = lambda: dbsession
+    application.dependency_overrides[get_neo4j_connector] = lambda: Neo4jDBConnector(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
     return application  # noqa: WPS331
 
 

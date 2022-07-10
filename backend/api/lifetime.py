@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 
 from settings import settings
 from db.models.base import Base
+from db.neo4j.connector import Neo4jDBConnector
 
 
 def _setup_db(app: FastAPI) -> None:
@@ -22,7 +23,7 @@ def _setup_db(app: FastAPI) -> None:
 
     :param app: fastAPI application.
     """
-    engine = create_async_engine(str(settings.db_url), echo=settings.db_echo)
+    engine = create_async_engine(settings.db_url, echo=settings.db_echo)
     session_factory = async_scoped_session(
         sessionmaker(
             engine,
@@ -33,6 +34,7 @@ def _setup_db(app: FastAPI) -> None:
     )
     app.state.db_engine = engine
     app.state.db_session_factory = session_factory
+    app.state.neo4j = Neo4jDBConnector(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
 
 
 def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:

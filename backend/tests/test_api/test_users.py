@@ -7,7 +7,7 @@ async def test_create_new_user_success(client) -> None:
         json={'password': 'Aa12345678@', 'username': 'banana'}
     )
     print(response.__dict__)
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json() == {'message': 'Created'}
 
 
