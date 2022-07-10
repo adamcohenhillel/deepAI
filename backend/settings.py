@@ -38,22 +38,6 @@ class Settings(BaseSettings):
     # Current environment
     environment: str = "dev"
 
-    log_level: LogLevel = LogLevel.INFO
-
-    # Variables for the database
-    db_host: str = "localhost"
-    db_port: int = 5432
-    db_user: str = "deeper2"
-    db_pass: str = "deeper2"
-    db_base: str = "deeper2"
-    db_echo: bool = False
-
-    # Variables for Redis
-    redis_host: str = "deeper2-redis"
-    redis_port: int = 6379
-    redis_user: Optional[str] = None
-    redis_pass: Optional[str] = None
-    redis_base: Optional[int] = None
 
     @property
     def db_url(self) -> str:

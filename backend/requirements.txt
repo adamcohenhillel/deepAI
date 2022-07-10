@@ -1,6 +1,8 @@
 #API:
 fastapi==0.78.0
 pydantic==1.9.1
+python-jose[cryptography]==3.3.0
+ujson==5.4.0
 
 # Text Analyzer
 openai==0.18.0

@@ -25,7 +25,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432  # Maps tcp port 55000 on service container to the host
+          - 5432:5432  # Maps tcp port 5432 on service container to the host
       neo4j:
         image: neo4j:4.2.0-enterprise
         env:
@@ -46,13 +46,13 @@ jobs:
           --health-start-period 30s
         ports:
           - 7687:7687
-      redis:
-        image: redis
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+      # redis:
+      #   image: redis
+      #   options: >-
+      #     --health-cmd "redis-cli ping"
+      #     --health-interval 10s
+      #     --health-timeout 5s
+      #     --health-retries 5
 
     steps:
     - name: Checkout Repo

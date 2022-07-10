@@ -5,8 +5,9 @@ from fastapi.responses import UJSONResponse
 from fastapi.routing import APIRouter
 
 from api.lifetime import register_shutdown_event, register_startup_event
-
 from api.users.views import users_router
+from api.exception_handlers import register_exception_handlers
+
 
 def get_app() -> FastAPI:
     """Get api application
@@ -24,6 +25,7 @@ def get_app() -> FastAPI:
     # Adds startup and shutdown events.
     register_startup_event(app)
     register_shutdown_event(app)
+    register_exception_handlers(app)
 
     api_router = APIRouter()
     api_router.include_router(users_router, prefix='/users', tags=['users'])
