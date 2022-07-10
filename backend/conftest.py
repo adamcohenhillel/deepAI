@@ -1,3 +1,7 @@
+"""Deeper 2022, All Rights Reserved
+
+Fixtures for pytests
+"""
 from typing import Any, AsyncGenerator
 
 import pytest

@@ -17,6 +17,10 @@ async def post(
     neo4j_connector = Depends(get_neo4j_connector),
 ):
     """Create a new deep request
+
+    :param body: request Json parameters
+    :param background_tasks: Interface to FastAPI background tasks
+    :param neo4j_connector: Connector details to
     """
     with neo4j_connector.use_session() as session:
         new_node_id = session.write_transaction(
