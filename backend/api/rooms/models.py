@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from sqlalchemy import Column, Integer, ForeignKey, Table, String, DateTime
 from sqlalchemy.orm import relationship, backref
 
-from core.ext import Base
+from db.models.base import Base
 
 
 users_rooms = Table('users_rooms',

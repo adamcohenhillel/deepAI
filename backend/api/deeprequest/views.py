@@ -7,7 +7,7 @@ from sanic.response import json, HTTPResponse
 from sanic_jwt import protected
 
 from api.deeprequest.schemas import DeepRequestSchema
-from core.neo4j.entities import DeepRequestNode
+from db.neo4j.entities import DeepRequestNode
 from tasks.pipelines import analyze_deep_request
 
 

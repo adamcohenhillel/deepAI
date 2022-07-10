@@ -2,7 +2,7 @@
 """
 import logging
 from typing import Dict
-from core.neo4j.entities import AdjectiveNode, RequestAdjectiveRealtionship
+from db.neo4j.entities import AdjectiveNode, RequestAdjectiveRealtionship
 
 
 async def add_describers_nodes(neo4j_session, data: Dict, node_id) -> None:
