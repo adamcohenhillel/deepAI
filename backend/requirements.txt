@@ -1,5 +1,6 @@
 #API:
 fastapi==0.78.0
+pydantic==1.9.1
 
 # Text Analyzer
 openai==0.18.0

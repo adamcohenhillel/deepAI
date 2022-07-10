@@ -62,7 +62,7 @@ class Settings(BaseSettings):
 
         :return: database URL.
         """
-        return 'postgresql+asyncpg://postgres:postgrespw@localhost:55000/postgres'
+        return 'postgresql+asyncpg://postgres:postgrespw@localhost:5432/postgres'
 
 
     class Config:
