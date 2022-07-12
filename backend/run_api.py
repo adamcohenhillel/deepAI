@@ -1,8 +1,9 @@
 """Deeper 2022, All Rights Reserved
 """
-from api import create_app
+from api.application import get_app
+import uvicorn
 
 
 if __name__ == '__main__':
-    app = create_app()
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app = get_app()
+    uvicorn.run(app, host="0.0.0.0", port=8000)

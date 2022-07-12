@@ -1,0 +1,78 @@
+name: Sanic Application Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgrespw
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432  # Maps tcp port 5432 on service container to the 5433 on the host
+      neo4j:
+        image: neo4j:4.2.0-enterprise
+        env:
+          NEO4J_dbms_security_procedures_unrestricted: apoc.*
+          NEO4J_dbms_connector_bolt_enabled: "true"
+          NEO4J_apoc_import_file_enabled: "true"
+          NEO4J_apoc_export_file_enabled: "true"
+          NEO4J_apoc_import_file_use__neo4j__config: "true"
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+          NEO4J_dbms_security_auth__enabled: "false"
+          NEO4J_dbms_connector_bolt_advertised__address: localhost:7687
+          NEO4JLABS_PLUGINS: '["apoc"]'
+        options: >-
+          --health-cmd "cypher-shell 'match (n) return count(n)'"
+          --health-timeout 10s
+          --health-retries 20
+          --health-interval 10s
+          --health-start-period 30s
+        ports:
+          - 7687:7687
+      # redis:
+      #   image: redis
+      #   options: >-
+      #     --health-cmd "redis-cli ping"
+      #     --health-interval 10s
+      #     --health-timeout 5s
+      #     --health-retries 5
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+
+    - name: Static Checks
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Unit Tests
+      run: |
+        cd backend
+        python -m pytest --asyncio-mode=auto

@@ -1,10 +1,8 @@
 
 """Deeper 2022, All Rights Reserved
 """
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class DeepRequestSchema:
+class DeepRequestSchema(BaseModel):
     deep_request: str
- 

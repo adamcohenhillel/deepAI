@@ -2,7 +2,7 @@
 """
 import logging
 
-from core.neo4j.connector import Neo4jDBConnector
+from db.neo4j.connector import Neo4jDBConnector
 from tasks.nlp import openai_text_extraction
 from tasks.graph import add_describers_nodes
 

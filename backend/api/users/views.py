@@ -1,54 +1,20 @@
 """Deeper 2022, All Rights Reserved
 """
-from sanic import Blueprint, Request
-from sanic.views import HTTPMethodView
-from sanic.response import json
-from sanic_ext import validate
-from sanic_jwt.exceptions import AuthenticationFailed
-from sqlalchemy.future import select
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.users.models import User
 from api.users.schemas import UserSchema
-from core.neo4j.entities import DeepRequestNode
+from db.models.user import User
+from db.session import get_db_session
 
+users_router = APIRouter()
 
-users_bp = Blueprint('users_bp', __name__)
-
-
-class UsersListResource(HTTPMethodView):
+@users_router.post('/', status_code=status.HTTP_201_CREATED)
+async def create_new_user(
+    user: UserSchema,
+    session: AsyncSession = Depends(get_db_session)
+):
+    """Create a new user
     """
-    """
-
-    @validate(json=UserSchema)
-    async def post(self, request):
-        """Create a new user
-        """
-        session = request.ctx.session
-        async with session.begin():
-            new_user = User(**request.json)
-            session.add_all([new_user])
-        return json(body={'message':'New user created'})
-
-
-async def authenticate(request: Request):
-    """Authentricate user based on username and password
-    """
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-
-    if not (username or password):
-        raise AuthenticationFailed('Missing username or password')
-
-    async with request.ctx.session.begin():
-        query = select(User).where(User.username == username)
-        result = await request.ctx.session.execute(query)
-        user: User = result.scalars().first()
-        
-    if user is None or password != user.password:
-        raise AuthenticationFailed("Username or password are incorrect")
-    else:
-        return {'user_id': user.id, 'username': user.username}
-
-
-users_bp = Blueprint('users_bp', url_prefix='/users')
-users_bp.add_route(UsersListResource.as_view(), '/')
+    session.add(User(username=user.username, password=user.password))
+    return {'message': 'Created'}
