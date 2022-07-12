@@ -32,6 +32,11 @@ Tasks:
 [ ] Build rooms/chat functionality for matches^
 [ ] Use config and env vars for database urls
 [ ] Admin panel
+[ ] Add websocket endpoint for chatting
+    [ ] Fetch chat history
+    [ ] subscribe to pubsub
+    [ ]
+
 
 Deployment stratergy
 [ ] No redis. no celery

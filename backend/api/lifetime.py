@@ -8,14 +8,15 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import sessionmaker
+import aioredis
 
 from settings import settings
 from db.models.base import Base
 from db.neo4j.connector import Neo4jDBConnector
 
 
-def _setup_db(app: FastAPI) -> None:
-    """Creates connection to the database
+def _setup_dbs(app: FastAPI) -> None:
+    """Creates connection to the databases
 
     This function creates SQLAlchemy engine instance,
     session_factory for creating sessions
@@ -49,8 +50,8 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
 
     @app.on_event('startup')
     async def _startup() -> None:  # noqa: WPS430
-        _setup_db(app)
-        # init_redis(app)
+        _setup_dbs(app)
+        app.state.redis = aioredis.from_url(settings.redis_url, decode_responses=True)
         async with app.state.db_engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
@@ -70,7 +71,7 @@ def register_shutdown_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
     @app.on_event("shutdown")
     async def _shutdown() -> None:  # noqa: WPS430
         await app.state.db_engine.dispose()
-        # await shutdown_redis(app)
+        await app.state.redis.close()
         pass  # noqa: WPS420
 
     return _shutdown

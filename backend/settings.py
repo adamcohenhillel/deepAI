@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     neo4j_uri = 'bolt://localhost:7687'
     neo4j_user = 'neo4j'
     neo4j_password = '12345678'
-    redis_url = ''
 
+    redis_url = 'redis://localhost:6379/0'
 
     class Config:
         env_file = ".env"

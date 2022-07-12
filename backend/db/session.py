@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
+from redis.asyncio import Redis
 
 from db.neo4j.connector import Neo4jDBConnector
 
@@ -32,3 +33,15 @@ async def get_neo4j_connector(request: Request) -> Neo4jDBConnector:
     :yield: neo4j connector
     """
     return request.app.state.neo4j
+
+
+async def get_redis_connection(request: Request) -> AsyncGenerator[Redis, None]:
+    """Get redis client.
+
+    This dependency aquires connection from pool.
+
+    :param request: current request.
+
+    :yield: redis client.
+    """
+    return request.app.state.redis
