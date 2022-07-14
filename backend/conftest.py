@@ -14,7 +14,7 @@ from db.neo4j.connector import Neo4jDBConnector
 from db.session import get_db_session, get_neo4j_connector
 from db.models.base import Base
 from settings import settings
-from api.application import get_app
+from api.app import get_app
 
 
 @pytest.fixture(scope="session")
@@ -86,10 +86,10 @@ def fastapi_app(
 
     :return: fastapi app with mocked dependencies.
     """
-    application = get_app()
-    application.dependency_overrides[get_db_session] = lambda: dbsession
-    application.dependency_overrides[get_neo4j_connector] = lambda: Neo4jDBConnector(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
-    return application  # noqa: WPS331
+    app = get_app()
+    app.dependency_overrides[get_db_session] = lambda: dbsession
+    app.dependency_overrides[get_neo4j_connector] = lambda: Neo4jDBConnector(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
+    return app
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ async def client(
     """
     Fixture that creates client for requesting server.
 
-    :param fastapi_app: the application.
+    :param fastapi_app: the app.
     :yield: client for the app.
     """
     async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:

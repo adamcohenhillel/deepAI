@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
-from redis.asyncio import Redis
+from aioredis import Redis
 
 from db.neo4j.connector import Neo4jDBConnector
 

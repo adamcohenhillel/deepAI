@@ -20,9 +20,9 @@ def _setup_dbs(app: FastAPI) -> None:
 
     This function creates SQLAlchemy engine instance,
     session_factory for creating sessions
-    and stores them in the application's state property.
+    and stores them in the app's state property.
 
-    :param app: fastAPI application.
+    :param app: fastAPI app.
     """
     engine = create_async_engine(settings.db_url, echo=settings.db_echo)
     session_factory = async_scoped_session(
@@ -39,12 +39,12 @@ def _setup_dbs(app: FastAPI) -> None:
 
 
 def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
-    """Actions to run on application startup.
+    """Actions to run on app startup.
 
     This function uses fastAPI app to store data
     inthe state, such as db_engine.
 
-    :param app: the fastAPI application.
+    :param app: the fastAPI app.
     :return: function that actually performs actions.
     """
 
@@ -62,9 +62,9 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
 
 
 def register_shutdown_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
-    """Actions to run on application's shutdown.
+    """Actions to run on app's shutdown.
 
-    :param app: fastAPI application.
+    :param app: fastAPI app.
     :return: function that actually performs actions.
     """
 

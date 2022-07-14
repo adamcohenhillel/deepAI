@@ -6,13 +6,13 @@ from fastapi.routing import APIRouter
 
 from api.users.views import users_router
 from api.deeprequest.views import deeprequest_router
-from api.chat.views import chat_router
+from api.rooms.views import rooms_router
 from api.lifetime import register_shutdown_event, register_startup_event
 from api.exception_handlers import register_exception_handlers
 
 
 def get_app() -> FastAPI:
-    """Get api application
+    """Get API app
     """
     app = FastAPI(
         title="deeper.",
@@ -32,7 +32,7 @@ def get_app() -> FastAPI:
     api_router = APIRouter()
     api_router.include_router(users_router, prefix='/users', tags=['users'])
     api_router.include_router(deeprequest_router, prefix='/deeprequest', tags=['users'])
-    api_router.include_router(chat_router, prefix='/chat', tags=['users'])
+    api_router.include_router(rooms_router, prefix='/rooms', tags=['users'])
 
     app.include_router(router=api_router, prefix='/api')
 
