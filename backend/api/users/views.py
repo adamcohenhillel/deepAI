@@ -7,7 +7,9 @@ from api.users.schemas import UserSchema
 from db.models.user import User
 from db.session import get_db_session
 
+
 users_router = APIRouter()
+
 
 @users_router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_new_user(
