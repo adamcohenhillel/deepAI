@@ -7,20 +7,24 @@ from sqlalchemy.orm import relationship, backref
 from db.models.base import Base
 
 
-users_rooms = Table('users_rooms',
+users_rooms = Table(
+    'users_rooms',
+    Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('room_id', Integer, ForeignKey('rooms.id'), primary_key=True)
 )
+
 
 class Room(Base):
     """
     """
     __tablename__ = 'rooms'
     id = Column(Integer, primary_key=True)
-    users = relationship('Users', secondary=users_rooms, lazy='subquery', backref=backref('rooms', lazy=True))
-    messages = relationship('RoomMessages', backref='room', lazy=True)
+    users = relationship('User', secondary=users_rooms, lazy='subquery', backref=backref('rooms', lazy=True))
+    messages = relationship('RoomMessage', backref='room', lazy=True)
 
-class RoomMessages(Base):
+
+class RoomMessage(Base):
     """
     """
     __tablename__ = 'room_messages'

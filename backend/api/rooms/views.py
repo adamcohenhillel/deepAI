@@ -3,19 +3,41 @@
 import asyncio
 import logging
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    WebSocket,
+    WebSocketDisconnect,
+    Depends
+)
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from aioredis.client import PubSub
+
+from db.session import get_db_session
+from db.models.rooms import Room
 
 
 rooms_router = APIRouter()
 
 
 @rooms_router.websocket('/{room_uuid}')
-async def room_websocket(room_uuid: str, websocket: WebSocket) -> None:
+async def room_websocket(
+    room_uuid: int,
+    websocket: WebSocket,
+    ) -> None:
     """
     """
     await websocket.accept()
     # TODO: Add user <-> Room validation!
+    session: AsyncSession = websocket.app.state.db_session_factory()
+    with session.begin():
+        query = await session.execute(select(Room).where(Room.id==room_uuid))
+        room: Room = query.scalars().first()
+        messages = room.messages
+        print('**************')
+        print(messages)
+        print('**************')
+
     _, pending = await asyncio.wait(
         [_consumer(websocket, room_uuid), _producer(websocket, room_uuid)],
         return_when=asyncio.FIRST_COMPLETED,
