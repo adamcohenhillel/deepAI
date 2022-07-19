@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, BackgroundTasks
 
 from api.deeprequest.schemas import DeepRequestSchema
 from db.neo4j.entities import DeepRequestNode
-from db.session import get_neo4j_connector
+from db.dependencies import get_neo4j_connector
 from tasks.pipelines import analyze_deep_request
 
 deeprequest_router = APIRouter()

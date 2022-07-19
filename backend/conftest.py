@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.orm import sessionmaker
 from db.neo4j.connector import Neo4jDBConnector
 
-from db.session import get_db_session, get_neo4j_connector
+from db.dependencies import get_db_session, get_neo4j_connector
 from db.models.base import Base
 from settings import settings
 from api.app import get_app

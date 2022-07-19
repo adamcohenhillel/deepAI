@@ -2,8 +2,11 @@
 fastapi==0.78.0
 pydantic==1.9.1
 python-jose[cryptography]==3.3.0
+python-multipart==0.0.5
 ujson==5.4.0
 uvicorn[standard]==0.18.2
+passlib[bcrypt]==1.7.4
+
 # Text Analyzer
 openai==0.18.0
 
