@@ -13,6 +13,7 @@ import aioredis
 from settings import settings
 from db.models.base import Base
 from db.models.rooms import Room, RoomMessage
+from db.models.user import User
 from db.neo4j.connector import Neo4jDBConnector
 
 
@@ -59,7 +60,13 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
 
         session = app.state.db_session_factory()
         room = Room()
-        room.messages.append(RoomMessage(message='hello'))
+        session.add(User(username='adam', password='thisisAstringPass1!'))
+        await session.commit()
+        room.messages.append(RoomMessage(text='hello', user_id=1))
+        room.messages.append(RoomMessage(text='heyy whats up', user_id=1))
+        room.messages.append(RoomMessage(text='yee im all good', user_id=1))
+        room.messages.append(RoomMessage(text='cool me too', user_id=1))
+        room.messages.append(RoomMessage(text='how are ya feeling?', user_id=1))
         session.add(room)
         await session.commit()
         pass  # noqa: WPS420

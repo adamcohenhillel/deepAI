@@ -7,14 +7,13 @@ from fastapi import (
     APIRouter,
     WebSocket,
     WebSocketDisconnect,
-    Depends
+    HTTPException
 )
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from aioredis.client import PubSub
 
-from db.session import get_db_session
-from db.models.rooms import Room
+from db.models.rooms import Room, RoomMessage
 
 
 rooms_router = APIRouter()
@@ -25,44 +24,74 @@ async def room_websocket(
     room_uuid: int,
     websocket: WebSocket,
     ) -> None:
-    """
+    """Websocket API endpoint to connect a chat room
+
+    :param room_uuid: 
+    :param websocket: 
     """
     await websocket.accept()
     # TODO: Add user <-> Room validation!
     session: AsyncSession = websocket.app.state.db_session_factory()
-    with session.begin():
-        query = await session.execute(select(Room).where(Room.id==room_uuid))
-        room: Room = query.scalars().first()
-        messages = room.messages
-        print('**************')
-        print(messages)
-        print('**************')
+    query = await session.execute(select(Room).where(Room.id==room_uuid))
+    room: Room = query.scalars().first()
+    if not room:
+        raise HTTPException(status_code=404, detail='Room Not Found')
+
+    # TODO: Add pagination, should we move this to a http endpoint?
+    for room_message in room.messages:
+        await websocket.send_text(room_message.message)
 
     _, pending = await asyncio.wait(
-        [_consumer(websocket, room_uuid), _producer(websocket, room_uuid)],
+        [_consumer(websocket, room, 1, session),
+        _producer(websocket, room)],
         return_when=asyncio.FIRST_COMPLETED,
     )
-    [task.cancel() for task in pending]
+    # for task in pending:
+    #     task.cancel()
 
 
-async def _consumer(websocket: WebSocket, room_uuid: str) -> None:
-    """
+async def _consumer(
+    websocket: WebSocket,
+    room: Room,
+    user_id: int,
+    session: AsyncSession
+) -> None:
+    """Coroutine to handle incoming data coming from the websocket
+
+    This function is waiting for messages coming from the
+    websocket (the user) and then when received, add it to the
+    sql database and publish it to the redis channel (the "room")
+
+    :param websocket: Websocket object of the
+    :param room:
+    :param user_id:
+    :param session:
     """
     try:
         redis = websocket.app.state.redis
         while True:
-            message = await websocket.receive_text()
-            if message:
-                await redis.publish(room_uuid, message)
+            websocket_text = await websocket.receive_text()
+            if websocket_text:
+                new_room_message = RoomMessage(text=websocket_text, user_id=user_id)
+                room.messages.append(new_room_message)
+                session.add(room)
+                await session.commit()
+                await redis.publish(room.channel, new_room_message.message)
     except WebSocketDisconnect as exc:
         logging.error(exc)
 
 
-async def _producer(websocket: WebSocket, room_uuid: str) -> None:
-    """
+async def _producer(websocket: WebSocket, room: Room) -> None:
+    """Coroutine to handle incoming messages from the room's channel
+    
+    This function subscribe to a redis channel and wait for a message 
+    from it, and then when received, pass it back to the websocket
+
+    :param websocket:
+    :param room:
     """
     pubsub: PubSub = websocket.app.state.redis.pubsub()
-    await pubsub.subscribe(room_uuid)
+    await pubsub.subscribe(room.channel)
     try:
         while True:
             message = await pubsub.get_message(ignore_subscribe_messages=True)
