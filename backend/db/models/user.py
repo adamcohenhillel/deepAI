@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from db.models.base import Base
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
 class User(Base):
@@ -31,9 +31,9 @@ class User(Base):
     def hash_password(self, password: str) -> str:
         """
         """
-        return pwd_context.hash(password)
+        return _pwd_context.hash(password)
     
     def verify_password(self, plain_password: str) -> bool:
         """
         """
-        return pwd_context.verify(plain_password, self.password)
+        return _pwd_context.verify(plain_password, self.password)

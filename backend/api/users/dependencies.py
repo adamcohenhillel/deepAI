@@ -12,21 +12,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models.user import User
 from db.dependencies import get_db_session
+from settings import settings
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
-
-# TODO: move to settings:
-SECRET_KEY = 'change-me-adam-please'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='api/users/auth')
 
 
 async def authenticated_user(
     db_session: AsyncSession = Depends(get_db_session),
     token: str = Depends(oauth2_scheme)
 ) -> User:
-    """
+    """Endpoint Dependency for authenticated user with a token
+
+    :param db_session: Inject db session dependency
+    :param token: Inject token from the http header
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,38 +34,32 @@ async def authenticated_user(
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except JWTError as e:
-        print(f'***** 1')
         logging.exception(e)
         raise credentials_exception
         
     username: str = payload.get('sub')
     if not username:
-        print('***** 2')
         raise credentials_exception
 
-    query = await db_session.execute(select(User).where(User.username==data.username))
+    query = await db_session.execute(select(User).where(User.username==username))
     user: User = query.scalars().first()
     if not user:
-        print('***** 3')
         raise credentials_exception
 
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """
+def create_access_token(data: dict, expiration: timedelta | None = None) -> str:
+    """Create a JWT Access token to the api
+
+    :param data: Data to store in the token, username for example
+    :param expiration: How long the token will be valid for?
+
+    :return: The JWT Token
     """
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM
-    )
-    return encoded_jwt
+    now = datetime.utcnow()
+    to_encode['exp'] = now + expiration if expiration else now + timedelta(minutes=15)
+    return jwt.encode(to_encode, settings.SECRET_KEY, settings.ALGORITHM)

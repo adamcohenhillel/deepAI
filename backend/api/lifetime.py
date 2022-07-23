@@ -51,7 +51,7 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
 
     @app.on_event('startup')
-    async def _startup() -> None:  # noqa: WPS430
+    async def _startup() -> None:
         _setup_dbs(app)
         app.state.redis = aioredis.from_url(settings.redis_url, decode_responses=True)
         async with app.state.db_engine.begin() as conn:
@@ -69,7 +69,6 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
         room.messages.append(RoomMessage(text='how are ya feeling?', user_id=1))
         session.add(room)
         await session.commit()
-        pass  # noqa: WPS420
 
     return _startup
 
@@ -82,9 +81,8 @@ def register_shutdown_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
 
     @app.on_event("shutdown")
-    async def _shutdown() -> None:  # noqa: WPS430
+    async def _shutdown() -> None:
         await app.state.db_engine.dispose()
         await app.state.redis.close()
-        pass  # noqa: WPS420
 
     return _shutdown
