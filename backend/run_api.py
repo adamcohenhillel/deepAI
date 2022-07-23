@@ -1,6 +1,6 @@
 """Deeper 2022, All Rights Reserved
 """
-from api.application import get_app
+from api.app import get_app
 import uvicorn
 
 

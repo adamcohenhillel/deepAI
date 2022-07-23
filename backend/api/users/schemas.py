@@ -1,11 +1,12 @@
 """Deeper 2022, All Rights Reserved
 """
 import re
+from fastapi import HTTPException, status
 
 from pydantic import BaseModel, validator
 
 
-class UserSchema(BaseModel):
+class UserInSchema(BaseModel):
     """
     """
     username: str
@@ -15,5 +16,17 @@ class UserSchema(BaseModel):
     def strong_password(cls, value, values):
         regex = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
         if not regex.search(value):
-            raise ValueError('Password too week, minimum eight characters, at least one letter and one number')
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Password too week, minimum eight characters, at least one letter and one number'
+            )
         return value
+
+class UserOutSchema(BaseModel):
+    """
+    """
+    id: int
+    username: str
+
+    class Config:
+        orm_mode = True

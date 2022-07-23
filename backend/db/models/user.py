@@ -1,8 +1,12 @@
 """Deeper 2022, All Rights Reserved
 """
 from sqlalchemy import Column, Integer, String
+from passlib.context import CryptContext
 
 from db.models.base import Base
+
+
+_pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
 class User(Base):
@@ -19,7 +23,17 @@ class User(Base):
 
     def __init__(self, username: str, password: str) -> None:
         self.username = username
-        self.password = password
+        self.password = self.hash_password(password)
     
     def __repr__(self) -> str:
         return f'<User {self.username} ({self.id})'
+
+    def hash_password(self, password: str) -> str:
+        """
+        """
+        return _pwd_context.hash(password)
+    
+    def verify_password(self, plain_password: str) -> bool:
+        """
+        """
+        return _pwd_context.verify(plain_password, self.password)

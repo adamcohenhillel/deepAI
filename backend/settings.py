@@ -4,33 +4,35 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    """
-    Application settings.
+    """Application settings.
 
     These parameters can be configured
     with environment variables.
     """
 
-    host: str = "127.0.0.1"
+    host: str = '127.0.0.1'
     port: int = 8000
     workers_count: int = 1  # quantity of workers for uvicorn
     reload: bool = False  # Enable uvicorn reloading
     db_echo: bool = False
     
-    # Current environment
-    environment: str = "dev"
-    db_url = 'postgresql+asyncpg://postgres:postgrespw@localhost:5433/postgres'
+    environment: str = 'dev'
 
+    # Databases:
+    db_url = 'postgresql+asyncpg://postgres:postgrespw@localhost:5433/postgres'
     neo4j_uri = 'bolt://localhost:7687'
     neo4j_user = 'neo4j'
     neo4j_password = '12345678'
-
     redis_url = 'redis://localhost:6379/0'
 
+    # Security:
+    SECRET_KEY = 'change-me-adam-please' # TODO: Change this ADAM
+    ALGORITHM = 'HS256'
+    ACCESS_TOKEN_EXPIRE_MINUTES = 30
     class Config:
-        env_file = ".env"
-        env_prefix = "DEEPER2_"
-        env_file_encoding = "utf-8"
+        env_file = '.env'
+        env_prefix = 'DEEPER2_'
+        env_file_encoding = 'utf-8'
 
 
 settings = Settings()

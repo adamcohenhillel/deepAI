@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
-from redis.asyncio import Redis
+from aioredis import Redis
 
 from db.neo4j.connector import Neo4jDBConnector
 
@@ -18,7 +18,7 @@ async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]
     """
     session: AsyncSession = request.app.state.db_session_factory()
 
-    try:  # noqa: WPS501
+    try:
         yield session
     finally:
         await session.commit()

@@ -2,25 +2,25 @@
 
 Fixtures for pytests
 """
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Tuple
 
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from db.neo4j.connector import Neo4jDBConnector
 
-from db.session import get_db_session, get_neo4j_connector
+from api.app import get_app
+from db.models.user import User
+from db.neo4j.connector import Neo4jDBConnector
+from db.dependencies import get_db_session, get_neo4j_connector
 from db.models.base import Base
 from settings import settings
-from api.application import get_app
 
 
 @pytest.fixture(scope="session")
 def anyio_backend() -> str:
-    """
-    Backend for anyio pytest plugin.
+    """Backend for anyio pytest plugin.
 
     :return: backend name.
     """
@@ -29,8 +29,7 @@ def anyio_backend() -> str:
 
 @pytest.fixture()
 async def _engine() -> AsyncGenerator[AsyncEngine, None]:
-    """
-    Create engine and databases.
+    """Create engine and databases.
 
     :yield: new engine.
     """
@@ -50,8 +49,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 async def dbsession(
     _engine: AsyncEngine,
 ) -> AsyncGenerator[AsyncSession, None]:
-    """
-    Get session to database.
+    """Get session to database.
 
     Fixture that returns a SQLAlchemy session with a SAVEPOINT, and the rollback to it
     after the test completes.
@@ -69,6 +67,10 @@ async def dbsession(
     )
     session = session_maker()
 
+    # A test user:
+    session.add(User(username='test_user', password='Aa12345678!'))
+    await session.commit()
+
     try:
         yield session
     finally:
@@ -81,15 +83,14 @@ async def dbsession(
 def fastapi_app(
     dbsession: AsyncSession,
 ) -> FastAPI:
-    """
-    Fixture for creating FastAPI app.
+    """Fixture for creating FastAPI app.
 
     :return: fastapi app with mocked dependencies.
     """
-    application = get_app()
-    application.dependency_overrides[get_db_session] = lambda: dbsession
-    application.dependency_overrides[get_neo4j_connector] = lambda: Neo4jDBConnector(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
-    return application  # noqa: WPS331
+    app = get_app()
+    app.dependency_overrides[get_db_session] = lambda: dbsession
+    app.dependency_overrides[get_neo4j_connector] = lambda: Neo4jDBConnector(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
+    return app
 
 
 @pytest.fixture
@@ -97,11 +98,30 @@ async def client(
     fastapi_app: FastAPI,
     anyio_backend: Any,
 ) -> AsyncGenerator[AsyncClient, None]:
-    """
-    Fixture that creates client for requesting server.
+    """Fixture that creates client for requesting server.
 
-    :param fastapi_app: the application.
+    :param fastapi_app: the app.
+
     :yield: client for the app.
     """
-    async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
-        yield ac
+    async with AsyncClient(app=fastapi_app, base_url='http://test') as async_client:
+        yield async_client
+
+
+@pytest.fixture
+async def client_and_token(
+    fastapi_app: FastAPI,
+    anyio_backend: Any,
+) -> Tuple[AsyncGenerator[AsyncClient, None], str]:
+    """Fixture that creates client for requesting server.
+
+    :param fastapi_app: the app.
+
+    :yield: client for the app.
+    """
+    async with AsyncClient(app=fastapi_app, base_url='http://test') as async_client:
+        response = await async_client.post(
+            '/api/users/auth',
+            data={'password': 'Aa12345678!', 'username': 'test_user'}
+        )
+        yield async_client, response.json()['access_token']
