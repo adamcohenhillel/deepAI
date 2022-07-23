@@ -26,7 +26,7 @@ def _setup_dbs(app: FastAPI) -> None:
 
     :param app: fastAPI app.
     """
-    engine = create_async_engine(settings.db_url, echo=settings.db_echo)
+    engine = create_async_engine(settings.db_url, echo=settings.db_echo, isolation_level="AUTOCOMMIT")
     session_factory = async_scoped_session(
         sessionmaker(
             engine,

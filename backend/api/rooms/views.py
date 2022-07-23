@@ -68,15 +68,18 @@ async def _consumer(
     :param session:
     """
     try:
-        redis = websocket.app.state.redis
-        while True:
-            websocket_text = await websocket.receive_text()
-            if websocket_text:
-                new_room_message = RoomMessage(text=websocket_text, user_id=user_id)
-                room.messages.append(new_room_message)
-                session.add(room)
-                await session.commit()
-                await redis.publish(room.channel, new_room_message.message)
+        async with websocket.app.state.db_engine.connect() as conn:
+            while True:
+                websocket_text = await websocket.receive_text()
+                if websocket_text:
+                    new_room_message = RoomMessage(text=websocket_text, user_id=user_id)
+                    room.messages.append(new_room_message)
+                    session.add(room)
+                    await session.commit()
+                    
+                    conn2 = await conn.get_raw_connection()
+                    await conn2.driver_connection.execute(f"NOTIFY {room.channel}, '{websocket_text}'")
+                    await asyncio.sleep(2)
     except WebSocketDisconnect as exc:
         logging.error(exc)
 
@@ -90,12 +93,13 @@ async def _producer(websocket: WebSocket, room: Room) -> None:
     :param websocket:
     :param room:
     """
-    pubsub: PubSub = websocket.app.state.redis.pubsub()
-    await pubsub.subscribe(room.channel)
-    try:
-        while True:
-            message = await pubsub.get_message(ignore_subscribe_messages=True)
-            if message:
-                await websocket.send_text(message.get('data'))
-    except Exception as e:
-        logging.error(e)
+    async def listener1(*args):
+        await websocket.send_text(args[3])
+    async with websocket.app.state.db_engine.connect() as conn:
+        try:
+            while True:
+                conn2 = await conn.get_raw_connection()
+                await conn2.driver_connection.add_listener(room.channel, listener1)
+                await asyncio.sleep(2)
+        except Exception as e:
+            logging.error(e)

@@ -34,7 +34,6 @@ Tasks:
 [ ] Admin panel
 [ ] Add websocket endpoint for chatting
     [ ] Fetch chat history
-    [ ] subscribe to pubsub
     [ ]
 
 
