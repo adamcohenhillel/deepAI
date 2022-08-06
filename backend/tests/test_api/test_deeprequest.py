@@ -4,7 +4,7 @@
 
 async def test_create_new_deep_request(client) -> None:
     response = await client.post(
-        '/api/deeprequest/',
+        '/api/deeprequests/',
         # headers={'Authorization': f'Bearer {access_token}'},
         json={'deep_request': 'This is something deep'}
     )

@@ -1,5 +1,6 @@
 """Deeper 2022, All Rights Reserved
 """
+import re
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -7,13 +8,41 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.users.schemas import UserInSchema, UserOutSchema
+
+from pydantic import BaseModel, validator
+
 from db.models.user import User
 from db.dependencies import get_db_session
-from api.users.dependencies import authenticated_user, create_access_token
+from api.dependencies import authenticated_user, create_access_token
 
 
 users_router = APIRouter()
+
+
+class UserInSchema(BaseModel):
+    """
+    """
+    username: str
+    password: str
+
+    @validator('password')
+    def strong_password(cls, value, values):
+        regex = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
+        if not regex.search(value):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Password too week, minimum eight characters, at least one letter and one number'
+            )
+        return value
+
+class UserOutSchema(BaseModel):
+    """
+    """
+    id: int
+    username: str
+
+    class Config:
+        orm_mode = True
 
 
 @users_router.post('', status_code=status.HTTP_201_CREATED)

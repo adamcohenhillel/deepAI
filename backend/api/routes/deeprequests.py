@@ -1,16 +1,21 @@
 """Deeper 2022, All Rights Reserved
 """
 from fastapi import APIRouter, Depends, BackgroundTasks
+from pydantic import BaseModel
 
-from api.deeprequest.schemas import DeepRequestSchema
 from db.neo4j.entities import DeepRequestNode
 from db.dependencies import get_neo4j_connector
 from tasks.pipelines import analyze_deep_request
 
-deeprequest_router = APIRouter()
+
+deeprequests_router = APIRouter()
 
 
-@deeprequest_router.post('/')
+class DeepRequestSchema(BaseModel):
+    deep_request: str
+
+
+@deeprequests_router.post('/')
 async def post(
     body: DeepRequestSchema,
     background_tasks: BackgroundTasks,
