@@ -7,20 +7,19 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-
 from pydantic import BaseModel, validator
 
-from db.models.user import User
-from db.dependencies import get_db_session
 from api.dependencies import authenticated_user, create_access_token
+from db.models.user import User
+from db.dependencies import get_db_session, get_neo4j_connector
+from db.neo4j.entities import UserNode
 
 
 users_router = APIRouter()
 
 
 class UserInSchema(BaseModel):
-    """
+    """Schema for getting user data from the client
     """
     username: str
     password: str
@@ -35,8 +34,9 @@ class UserInSchema(BaseModel):
             )
         return value
 
+
 class UserOutSchema(BaseModel):
-    """
+    """Schema for returning user object to the client
     """
     id: int
     username: str
@@ -48,12 +48,18 @@ class UserOutSchema(BaseModel):
 @users_router.post('', status_code=status.HTTP_201_CREATED)
 async def create_new_user(
     user: UserInSchema,
-    db_session: AsyncSession = Depends(get_db_session)
+    db_session: AsyncSession = Depends(get_db_session),
+    neo4j_connector = Depends(get_neo4j_connector),
 ):
-    """Create a new user
+    """Create a new user (creates sql entry and a graph node)
+
+    :param user: User details
     """
-    db_session.add(User(username=user.username, password=user.password))
+    new_user = User(username=user.username, password=user.password)
+    db_session.add(new_user)
     await db_session.commit()
+    with neo4j_connector.use_session() as session:
+        session.write_transaction(UserNode.create, user_id=new_user.id)
     return {'message': 'Created'}
 
 
