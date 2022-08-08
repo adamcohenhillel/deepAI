@@ -17,6 +17,7 @@ class User(Base):
     id: int = Column(Integer, primary_key=True)
     username: str  = Column(String, nullable=False, unique=True)
     password: str = Column(String, nullable=False)
+    # rooms = real
 
     # TODO: Add email? some identiney verification?
     # TODO: Add back relationship to matches
@@ -34,6 +35,17 @@ class User(Base):
         return _pwd_context.hash(password)
     
     def verify_password(self, plain_password: str) -> bool:
-        """
+        """Check if given password ia correct
+
+        :param plain_password: password (in plain text) to check against
         """
         return _pwd_context.verify(plain_password, self.password)
+    
+    def in_room(self, room_id: int) -> bool:
+        """Checks if the given user is part of a room
+
+        :param room_id: What room to check in
+
+        :return: True if in room, False otherwise
+        """
+        return True if room_id in [r.id for r in self.rooms] else False

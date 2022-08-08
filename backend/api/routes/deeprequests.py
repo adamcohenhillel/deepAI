@@ -36,7 +36,7 @@ async def post(
             request=body.deep_request
         )
         realtionship_id = session.write_transaction(
-            UserDeepRequestRealtionship.create,
+            UserDeepRequestRealtionship.get_or_create,
             user.id,
             new_node_id,
         )
