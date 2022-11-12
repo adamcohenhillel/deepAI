@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import sessionmaker
-import aioredis
+# import aioredis
 
 from settings import settings
 from db.models.base import Base
@@ -53,7 +53,7 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
     @app.on_event('startup')
     async def _startup() -> None:
         _setup_dbs(app)
-        app.state.redis = aioredis.from_url(settings.redis_url, decode_responses=True)
+        # app.state.redis = aioredis.from_url(settings.redis_url, decode_responses=True)
         async with app.state.db_engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
@@ -68,6 +68,8 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
         room.messages.append(RoomMessage(text='cool me too', user_id=1))
         room.messages.append(RoomMessage(text='how are ya feeling?', user_id=1))
         session.add(room)
+        session.add(Room())
+        session.add(Room())
         await session.commit()
 
     return _startup
@@ -83,6 +85,6 @@ def register_shutdown_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
     @app.on_event("shutdown")
     async def _shutdown() -> None:
         await app.state.db_engine.dispose()
-        await app.state.redis.close()
+        # await app.state.redis.close()
 
     return _shutdown

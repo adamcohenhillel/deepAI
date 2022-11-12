@@ -22,9 +22,9 @@ Groups and individuals that find eachother and
 
 
 Tasks:
-[ ] Adding authentication
-[ ] Writing CI/CD pipelines
-[ ] Write tests
+[x] Adding authentication
+[x] Writing CI/CD pipelines
+[x] Write tests
 [ ] Add docstrings for everything
 [ ] Going over code standtards: Types, import order, (Add to checks)
 [ ] Add timestamps to the neo4j nodes (to be able to filteer better when matching)

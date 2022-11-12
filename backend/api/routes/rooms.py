@@ -7,13 +7,15 @@ from fastapi import (
     APIRouter,
     WebSocket,
     WebSocketDisconnect,
-    HTTPException
+    HTTPException,
+    Depends
 )
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from aioredis.client import PubSub
 
+from api.dependencies import authenticated_user
 from db.models.rooms import Room, RoomMessage
+from db.models.user import User
 
 
 rooms_router = APIRouter()
@@ -23,14 +25,17 @@ rooms_router = APIRouter()
 async def room_websocket(
     room_uuid: int,
     websocket: WebSocket,
-    ) -> None:
+    # user: User = Depends(authenticated_user)
+) -> None:
     """Websocket API endpoint to connect a chat room
 
     :param room_uuid: 
     :param websocket: 
     """
     await websocket.accept()
-    # TODO: Add user <-> Room validation!
+    # if not user.in_room(room_uuid):
+    #     raise HTTPException(status_code=401, detail='User not Authorized')
+
     session: AsyncSession = websocket.app.state.db_session_factory()
     query = await session.execute(select(Room).where(Room.id==room_uuid))
     room: Room = query.scalars().first()
@@ -60,7 +65,7 @@ async def _consumer(
 
     This function is waiting for messages coming from the
     websocket (the user) and then when received, add it to the
-    sql database and publish it to the redis channel (the "room")
+    sql database and publish it to the postgresql channel (the "room")
 
     :param websocket: Websocket object of the
     :param room:
@@ -87,7 +92,7 @@ async def _consumer(
 async def _producer(websocket: WebSocket, room: Room) -> None:
     """Coroutine to handle incoming messages from the room's channel
     
-    This function subscribe to a redis channel and wait for a message 
+    This function subscribe to a postgresql channel and wait for a message 
     from it, and then when received, pass it back to the websocket
 
     :param websocket:
@@ -95,6 +100,7 @@ async def _producer(websocket: WebSocket, room: Room) -> None:
     """
     async def listener1(*args):
         await websocket.send_text(args[3])
+
     async with websocket.app.state.db_engine.connect() as conn:
         try:
             while True:
