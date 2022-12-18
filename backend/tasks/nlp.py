@@ -2,12 +2,11 @@
 
 TODO: Need to not be depended on OpenAI API, Too expensive
 """
+import os
+import logging
 import json
 from json.decoder import JSONDecodeError
-
-from random import randint
-import logging
-from typing import Dict, TypedDict
+from typing import Dict
 
 import openai
 
@@ -25,7 +24,8 @@ _ExtractContext: Dict = {
     # "neuroticism": 0
 }
 
-openai.api_key = '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'
+openai.api_key = os.getenv('OPENAI_APIKEY')
+
 _OPENAI_PROMPT = f"Analyse the following tweet and turn it into a JSON object as follows: \n{json.dumps(_ExtractContext)}\n\nTweet: BABABA",
 _MAX_TOKENS = 500
 
