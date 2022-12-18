@@ -2,16 +2,32 @@
 
 TODO: Need to not be depended on OpenAI API, Too expensive
 """
+import json
+from json.decoder import JSONDecodeError
+
 from random import randint
 import logging
-from typing import Dict
+from typing import Dict, TypedDict
 
 import openai
 
-openai.api_key = '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'
-TO_EXTRACT = ['Categories', 'Keywords', 'Gender', 'Age Range']
-_TO_EXTRACT_JOINED = ', '.join(TO_EXTRACT)
-_OPENAI_PROMPT = f"Classify the following tweet into: {_TO_EXTRACT_JOINED}\n\n\nTweet: "  # TODO: Optimize this prompt
+
+_ExtractContext: Dict = {
+    "5_categories": [],
+    "5_keywords": [],
+    "positiviety_scale": 100,
+    "meaning": "",
+    "follow_up_questions": [],
+    # "openness": 0,
+    # "conscientiousness": 0,
+    # "extroversion": 0,
+    # "agreeableness": 0, 
+    # "neuroticism": 0
+}
+
+openai.api_key = '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'
+_OPENAI_PROMPT = f"Analyse the following tweet and turn it into a JSON object as follows: \n{json.dumps(_ExtractContext)}\n\nTweet: BABABA",
+_MAX_TOKENS = 500
 
 _s = 'abcdefghijklmnopkrstuvwxyz123456789ABCDEFGHIJKLMNOPQRSTUVWX!@£$%^&*'
 
@@ -23,14 +39,13 @@ async def openai_text_extraction(deep_request: str) -> Dict:
 
     :return:
     """
-    return {'Categories': _s[randint(0, len(_s))], 'Keywords': _s[randint(0, len(_s))], 'Gender': 'Male', 'Age Range': '18-25'}
     prompt = f"{_OPENAI_PROMPT}\"{deep_request}\""
     logging.info(f'About to query OpenAI with the folloiwng prompt: "{prompt}"')
     response = openai.Completion.create(
-        engine="text-davinci-002",
+        engine="text-davinci-003",
         prompt=prompt,
-        temperature=0,
-        max_tokens=140,
+        temperature=0.7,
+        max_tokens=_MAX_TOKENS,
         top_p=1,
         frequency_penalty=2,
         presence_penalty=0
@@ -38,15 +53,24 @@ async def openai_text_extraction(deep_request: str) -> Dict:
     logging.info(f'OpenAI response is: {response}')
 
     # Extract:
-    found = {}
     raw_text_response = response['choices'][0]['text']
-    for line in raw_text_response.splitlines():
-        if line:
-            for item in TO_EXTRACT:
-                line_start = f'{item.lower()}: '
-                if line.lower().startswith(line_start):
-                    found[item] = line.lower().replace(
-                        line_start, '').split(', ')
-                    break
-    logging.info(f'Extraction found:\n{found}')
-    return found
+    try:
+        json_data = json.loads(raw_text_response)
+    except JSONDecodeError:
+        fixed_raw_text = fix_broken_json(raw_text_response)
+        json_data = json.loads(fixed_raw_text)
+
+    return json_data
+
+
+def fix_broken_json(data: str) -> str:
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=f"Fix this broken JSON:\n{data}",
+        temperature=1,
+        max_tokens=_MAX_TOKENS,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    return response['choices'][0]['text']
