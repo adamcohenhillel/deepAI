@@ -1,67 +1,109 @@
 """ORM-like approach to neo4j nodes
 """
+import json
 from abc import ABC, abstractmethod
+from typing import Literal
 
 
-class _Neo4jNode(ABC):
-    """
-    """
+class _Neo4jObject(ABC):
 
     @property
     @abstractmethod
     def label(self) -> str:
-        raise NotImplementedError
+        raise NotImplementedError('This method must be implemented')
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def create(self, *args, **kwargs):
-        raise NotImplementedError
+    def create(cls, tx, **kwargs) -> int:
+        raise NotImplementedError('This method must be implemented')
 
 
-class DeepRequestNode(_Neo4jNode):
+class _Node(_Neo4jObject):
     """
     """
+
+    @classmethod
+    def _raw_query(
+        cls,
+        tx,
+        creation_action: Literal['MERGE', 'CREATE'],
+        **kwargs
+    ) -> int:
+        obj = ', '.join([f'{k}: {json.dumps(v)}' for k, v in kwargs.items()])  # Creates a string as follow: key1: $key1, key2: $key2,  
+        query = f'{creation_action} (n:{cls.label} {{{obj}}}) RETURN ID(n) AS node_id'
+        result = tx.run(query)
+        record = result.single()
+        return record['node_id']
+
+    @classmethod
+    def create(cls, tx, **kwargs) -> int:
+        return cls._raw_query(tx, 'CREATE', **kwargs)
+
+    @classmethod
+    def get_or_create(cls, tx, **kwargs) -> int:
+        return cls._raw_query(tx, 'MERGE', **kwargs)
+
+
+class _Realtionship(_Neo4jObject):
+    """
+    """
+
+    @classmethod
+    def _raw_query(
+        cls,
+        tx,
+        creation_action: Literal['CREATE', 'MERGE'],
+        condition: str
+    ) -> int:
+        """Match two nodes and creates a relationship between them
+
+        :param tx: Neo4j transaction object
+        :param creation_action: How to create the relationship
+        :param condition: How to find the two nodes: a, b
+        """
+        query = f'MATCH (a), (b) WHERE {condition} {creation_action} (a)-[r:{cls.label}]->(b) RETURN ID(r) as relationship_id'
+        result = tx.run(query)
+        record = result.single()
+        return record['relationship_id']
+
+
+class DeepRequestNode(_Node):
     label = 'DeepRequest'
 
-    @staticmethod
-    def create(tx, raw_request) -> int:
-        query = "CREATE (n:DeepRequest { request: $raw_request }) RETURN ID(n) AS node_id"
-        result = tx.run(query, raw_request=raw_request)
-        record = result.single()
-        return record["node_id"]
-    
-    @staticmethod
-    def matched_nodes(tx, deep_id, number_of_related):
-        query = """
-        MATCH (d1:DeepRequest)-->(a:AdjectiveNode)<--(d2:DeepRequest)
-        WHERE ID(d1) = $deep_id 
-        WITH d1, d2, collect(a) as related_adjectives
-        WHERE size(related_adjectives) > $number_of_related
-        RETURN d1, d2, related_adjectives
-        """
-        result = tx.run(query, deep_id=deep_id, number_of_related=number_of_related)
-        record = result.single()
-        return record["node_id"]
+
+class UserNode(_Node):
+    label = 'UserNode'
 
 
-class AdjectiveNode(_Neo4jNode):
-    """
-    """
-    label = "AdjectiveNode"
-    
-    @staticmethod
-    def create(tx, adjective, key) -> int:
-        query = "MERGE (n:AdjectiveNode { adjective: $adjective, key: $key }) RETURN ID(n) AS node_id"
-        result = tx.run(query, adjective=adjective, key=key)
-        record = result.single()
-        return record["node_id"]
+class AdjectiveNode(_Node):
+    label = 'AdjectiveNode'
 
 
-class RequestAdjectiveRealtionship(_Neo4jNode):
+class RequestAdjectiveRealtionship(_Realtionship):
+    label = 'IS'
 
-    @staticmethod
-    def create(tx, request_node_id, adjective_node_id) -> int:
-        query = "MATCH (a), (b) WHERE ID(a) = $request_node_id AND ID(b) = $adjective_node_id MERGE (a)-[r:IS]->(b) RETURN ID(r) as relationship_id"
-        result = tx.run(query, request_node_id=request_node_id, adjective_node_id=adjective_node_id)
-        record = result.single()
-        return record["relationship_id"]
+    @classmethod
+    def get_or_create(cls, tx, node_a_id, node_b_id):
+        cls._raw_query(tx, 'MERGE', f'ID(a) = {node_a_id} AND ID(b) = {node_b_id}')
+
+
+class UserDeepRequestRealtionship(_Realtionship):
+    label = 'REQUESTED'
+
+    @classmethod
+    def get_or_create(cls, tx, node_a_id, node_b_id):
+        cls._raw_query(tx, 'MERGE', f'a.user_id = {node_a_id} AND ID(b) = {node_b_id}')
+
+
+    # @staticmethod
+    # def matched_nodes(tx, deep_id, number_of_related):
+    #     query = """
+    #     MATCH (d1:DeepRequest)-->(a:AdjectiveNode)<--(d2:DeepRequest)
+    #     WHERE ID(d1) = $deep_id 
+    #     WITH d1, d2, collect(a) as related_adjectives
+    #     WHERE size(related_adjectives) > $number_of_related
+    #     RETURN d1, d2, related_adjectives
+    #     """
+    #     result = tx.run(query, deep_id=deep_id, number_of_related=number_of_related)
+    #     record = result.single()
+    #     return record['node_id']

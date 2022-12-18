@@ -25,7 +25,7 @@ class Room(Base):
 
     @property
     def channel(self) -> str:
-        return f'room:{self.id}'
+        return f'room{self.id}'
 
 
 class RoomMessage(Base):

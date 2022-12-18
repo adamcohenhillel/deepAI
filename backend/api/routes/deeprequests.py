@@ -1,20 +1,28 @@
 """Deeper 2022, All Rights Reserved
 """
 from fastapi import APIRouter, Depends, BackgroundTasks
+from pydantic import BaseModel
 
-from api.deeprequest.schemas import DeepRequestSchema
-from db.neo4j.entities import DeepRequestNode
+from api.dependencies import authenticated_user
+from db.models.user import User
+from db.neo4j.entities import DeepRequestNode, UserDeepRequestRealtionship
 from db.dependencies import get_neo4j_connector
 from tasks.pipelines import analyze_deep_request
 
-deeprequest_router = APIRouter()
+
+deeprequests_router = APIRouter()
 
 
-@deeprequest_router.post('/')
+class DeepRequestSchema(BaseModel):
+    deep_request: str
+
+
+@deeprequests_router.post('/')
 async def post(
     body: DeepRequestSchema,
     background_tasks: BackgroundTasks,
     neo4j_connector = Depends(get_neo4j_connector),
+    user: User = Depends(authenticated_user)
 ):
     """Create a new deep request
 
@@ -25,8 +33,14 @@ async def post(
     with neo4j_connector.use_session() as session:
         new_node_id = session.write_transaction(
             DeepRequestNode.create,
-            body.deep_request
+            request=body.deep_request
         )
+        realtionship_id = session.write_transaction(
+            UserDeepRequestRealtionship.get_or_create,
+            user.id,
+            new_node_id,
+        )
+
     background_tasks.add_task(
         analyze_deep_request,
         neo4j_connector,
