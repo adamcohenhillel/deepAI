@@ -1,5 +1,5 @@
 # deeper
-A platform that helps you find, explore, express and understand your true self, using AI.
+A platform that helps you explore, understand, and grow your true self, using AI.
 
 
 ### How/What:
